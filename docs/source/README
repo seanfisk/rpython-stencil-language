@@ -1,0 +1,5 @@
+Run `sphinx-apidoc -o . ../../stencil_lang' in this directory.
+
+This will generate `modules.rst' and `stencil_lang.rst'.
+
+Then include `modules.rst' in your `index.rst' file.
