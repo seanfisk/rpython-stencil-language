@@ -2,12 +2,14 @@
 """:mod:`stencil_lang.main` -- Program entry point
 """
 
-from __future__ import print_function
-
-import argparse
+import os
 import sys
 
 from stencil_lang import metadata
+
+
+def usage(argv):
+    return 'usage: %s INPUT_FILENAME' % argv[0]
 
 
 def _main(argv):
@@ -17,33 +19,43 @@ def _main(argv):
     :type argv: :class:`list`
     """
     author_strings = []
-    for name, email in zip(metadata.authors, metadata.emails):
-        author_strings.append('Author: {0} <{1}>'.format(name, email))
+    for i in xrange(len(metadata.authors)):
+        author_strings.append(
+            'Author: %s <%s>' % (metadata.authors[i], metadata.emails[i]))
 
-    epilog = '''
-{project} {version}
+    # We can't use argparse, so we do some old-school argument parsing.
+    if '-h' in argv or '--help' in argv:
+        print usage(argv)
+        # RPython doesn't support named specifiers.
+        print '''
+%s %s
 
-{authors}
-URL: <{url}>
-'''.format(
-        project=metadata.project,
-        version=metadata.version,
-        authors='\n'.join(author_strings),
-        url=metadata.url)
+%s
+URL: <%s>
+''' % (metadata.project, metadata.version,
+       '\n'.join(author_strings), metadata.url)
+        return 0
 
-    arg_parser = argparse.ArgumentParser(
-        prog=argv[0],
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        description=metadata.description,
-        epilog=epilog)
-    arg_parser.add_argument(
-        '-v', '--version',
-        action='version',
-        version='{0} {1}'.format(metadata.project, metadata.version))
+    if '-V' in argv or '--version' in argv:
+        print '%s %s' % (metadata.project, metadata.version)
+        return 0
 
-    arg_parser.parse_args(args=argv[1:])
+    if len(argv) != 2:
+        print usage(argv)
+        return 1
 
-    print(epilog)
+    input_filename = argv[1]
+
+    input_fp = os.open(input_filename, os.O_RDONLY, 0777)
+
+    source_code_list = []
+    while True:
+        read = os.read(input_fp, 4096)
+        if len(read) == 0:
+            break
+        source_code_list.append(read)
+    os.close(input_fp)
+    # source_code = ''.join(source_code_list)
 
     return 0
 
@@ -51,6 +63,29 @@ URL: <{url}>
 def main():
     """Main for use with setuptools/distribute."""
     raise SystemExit(_main(sys.argv))
+
+
+def target(*args):
+    """Target function for use with RPython."""
+    return _main, None
+
+
+def jitpolicy(driver):
+    """Define a JIT policy for PyPy.
+
+    :param driver: jit driver
+    :type driver: :class:`pypy.rlib.jit.JitDriver`
+    :return: jit policy
+    :rtype: :class:`pypy.jit.codewriter.policy.JitPolicy`
+    """
+    try:
+        # PyPy >= 2.0-beta2
+        from rpython.jit.codewriter.policy import JitPolicy
+    except ImportError:
+        # PyPy <= 2.0-beta1
+        from pypy.jit.codewriter.policy import JitPolicy
+
+    return JitPolicy()
 
 
 if __name__ == '__main__':
