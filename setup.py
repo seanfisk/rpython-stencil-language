@@ -40,8 +40,7 @@ setup_dict = dict(
     ],
     packages=find_packages(exclude=['tests', 'tests.*']),
     install_requires=[
-        'argparse',  # argparse is in the Python >= 2.7 standard library
-                     # this is for Python 2.6 compatibility
+        'rply',
     ],
     zip_safe=False,  # don't use eggs
     entry_points={
