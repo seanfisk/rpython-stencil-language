@@ -5,7 +5,8 @@ from stencil_lang.parser import generate_parser, Context, ParseError
 
 
 def assert_exc_info_msg(exc_info, expected_msg):
-    assert str(exc_info.value) == expected_msg
+    # LHS and RHS intentionally placed so diffs seem correct.
+    assert expected_msg == str(exc_info.value)
 
 
 def make_token_iter(token_tuple_list):
@@ -30,6 +31,8 @@ class TestParser(object):
                 ('INDEX', '10'),
                 ('REAL', '-768.245'),
             ]), context)
+            # TODO: Implementation detail, so maybe not best candidate for a
+            # test.
             assert context.registers[10] == -768.245
 
         def test_sto_pr(self, parser, context, capsys):
@@ -53,7 +56,8 @@ class TestParser(object):
                     ('INDEX', '37'),
                     # STO is missing a REAL argument
                 ]), context)
-            assert_exc_info_msg(exc_info, 'Unexpected end of statement')
+            assert_exc_info_msg(
+                exc_info, "Unexpected `$end'")
 
         def test_missing_pr_arg(self, parser, context):
             with raises(ParseError) as exc_info:
@@ -62,7 +66,9 @@ class TestParser(object):
                     ('INDEX', '37'),
                     ('REAL', '42.3'),
                     ('PR', 'PR'),
+                    # PR is missing an INDEX argument
                     ('PR', 'PR'),
                     ('INDEX', '37'),
                 ]), context)
-            assert_exc_info_msg(exc_info, 'Unexpected end of statement')
+            assert_exc_info_msg(
+                exc_info, "Unexpected `PR'")

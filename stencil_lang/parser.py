@@ -23,13 +23,9 @@ class Context(object):
 class ParseError(Exception):
     def __init__(self, token_name):
         self._token_name = token_name
-        # self._source_pos = source_pos
 
     def __str__(self):
-        # if self._source_pos is None:
-        return 'Unexpected end of statement'
-        # return ("Unexpected `%s' at line %d, col %d" %
-        #         self._token_name, self._source_pos)
+        return "Unexpected `%s'" % self._token_name
 
 
 pg = ParserGenerator(tokens.keys(), cache_id=metadata.package)
@@ -78,7 +74,7 @@ def index(state, p):
 
 @pg.error
 def error_handler(state, token):
-    # token.getsourcepos() will be None if end of statement.
+    # NOTE: SourcePosition is a class, but it's not actually implemented :(
     raise ParseError(token.gettokentype())
 
 
