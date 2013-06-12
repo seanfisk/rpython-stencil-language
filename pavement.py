@@ -2,9 +2,10 @@
 
 from __future__ import print_function
 
+import os
 import sys
 import time
-
+import errno
 import subprocess
 
 ## Python 2.6 subprocess.check_output compatibility. Thanks Greg Hewgill!
@@ -19,7 +20,7 @@ if 'check_output' not in dir(subprocess):
         return out
     subprocess.check_output = check_output
 
-from paver.easy import options, task, Bunch, needs
+from paver.easy import options, task, Bunch, needs, cmdopts
 from paver.setuputils import install_distutils_tasks
 import paver.doctools
 
@@ -34,6 +35,8 @@ except ImportError:
 
 sys.path.append('.')
 from setup import setup_dict
+
+from stencil_lang import metadata
 
 ## Constants
 CODE_DIRECTORY = 'stencil_lang'
@@ -71,6 +74,16 @@ def git_ls_files(*cmd_args):
     cmd = ['git', 'ls-files']
     cmd.extend(cmd_args)
     return set(subprocess.check_output(cmd).splitlines())
+
+
+def get_num_cpus():
+    """Determine the number of CPUs on this machine.
+
+    :return: number of CPUs
+    :rtype: :class:`int`
+    """
+    import multiprocessing
+    return multiprocessing.cpu_count()
 
 
 def print_success_message(message):
@@ -163,6 +176,40 @@ def _big_text(text):
 
 
 ## Tasks
+
+@task
+@cmdopts([
+    ('jit', 'j', 'Use jit instead of the default optimization')
+])
+def translate(options):
+    """Translate the interpreter using the RPython toolchain."""
+    try:
+        cpus = get_num_cpus()
+        # TODO: Will probably have to modify this to find RPython libraries.
+        env = {'PYTHONPATH': '.'}
+        env.update(os.environ)
+        cmd_flags = ['--make-jobs', str(cpus)]
+        if 'jit' in options.translate:
+            cmd_flags += ['--output', metadata.package + '-jit', '--opt=jit']
+        else:
+            cmd_flags += ['--output', metadata.package]
+        cmd_line = (['translate.py'] + cmd_flags +
+                    [os.path.join(CODE_DIRECTORY, 'main.py')])
+        print_success_message('Translating: ' + ' '.join(cmd_line))
+        subprocess.check_call(cmd_line, env=env)
+    except OSError as error:
+        if error.errno == errno.ENOENT:
+            # This is a `No such file or directory' error. That
+            # (probably) means the system could not find the
+            # executable.'`
+            print_failure_message(
+                "Could not find PyPy `translate.py' executable. "
+                "Please ensure it is on your PATH.")
+        else:
+            # The error wasn't from being unable to locate the
+            # executable. Re-raise the OSError.'
+            raise
+
 
 @task
 @needs('html', 'setuptools.command.sdist')
