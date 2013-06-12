@@ -40,7 +40,11 @@ setup_dict = dict(
     ],
     packages=find_packages(exclude=['tests', 'tests.*']),
     install_requires=[
-        'rply',
+        'rply==0.6.2-dev',
+    ],
+    dependency_links=[
+        'https://github.com/alex/rply/archive/'
+        'bbb4236b605b53ffccf39661f4c1abbc86b3d695.zip#egg=rply-0.6.2-dev'
     ],
     zip_safe=False,  # don't use eggs
     entry_points={
