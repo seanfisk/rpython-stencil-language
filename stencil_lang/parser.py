@@ -7,10 +7,12 @@ from stencil_lang.tokens import tokens
 
 class ValueBox(BaseBox):
     def __init__(self, value):
-        self.value = value
+        self._value = value
 
+    # Don't name this function `value'. RPython doesn't like it when
+    # translating.
     def get_value(self):
-        return self.value
+        return self._value
 
 # Thought IntBox and RealBox do the same thing, they both need to exist because
 # they hold different types.
@@ -59,11 +61,11 @@ def stmt(state, p):
     pass
 
 
-@pg.production('sto : STO index real')
+@pg.production('sto : STO index number')
 def sto(state, p):
     index = p[1].get_value()
-    real = p[2].get_value()
-    state.registers[index] = real
+    number = p[2].get_value()
+    state.registers[index] = number
 
 
 @pg.production('pr : PR index')
@@ -72,13 +74,21 @@ def pr(state, p):
     print state.registers[index]
 
 
+@pg.production('number : int')
+@pg.production('number : real')
+def number(state, p):
+    return p[0]
+
+
 @pg.production('real : REAL')
 def real(state, p):
     return RealBox(float(p[0].getstr()))
 
 
-@pg.production('index : INDEX')
-def index(state, p):
+@pg.production('int : POS_INT')
+@pg.production('int : NEG_INT')
+@pg.production('index : POS_INT')
+def int_(state, p):
     return IntBox(int(p[0].getstr()))
 
 

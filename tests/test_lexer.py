@@ -25,6 +25,21 @@ def assert_lex_token_list(code, expected_token_tuples):
 
 class TestLexer(object):
     class TestValid(object):
+        def test_sto(self):
+            assert_lex_token_list('STO', [('STO', 'STO')])
+
+        def test_pos_int(self):
+            assert_lex_token_list('20', [('POS_INT', '20')])
+
+        def test_pos_int_leading_zero(self):
+            assert_lex_token_list('0020', [('POS_INT', '0020')])
+
+        def test_neg_int(self):
+            assert_lex_token_list('-78', [('NEG_INT', '-78')])
+
+        def test_neg_int_leading_zero(self):
+            assert_lex_token_list('-078', [('NEG_INT', '-078')])
+
         def test_sto_pr(self):
             code = '''
     STO 1 32.3
@@ -34,15 +49,15 @@ class TestLexer(object):
     '''
             assert_lex_token_list(code, [
                 ('STO', 'STO'),
-                ('INDEX', '1'),
+                ('POS_INT', '1'),
                 ('REAL', '32.3'),
                 ('PR', 'PR'),
-                ('INDEX', '2'),
+                ('POS_INT', '2'),
                 ('STO', 'STO'),
-                ('INDEX', '10'),
+                ('POS_INT', '10'),
                 ('REAL', '-0.1'),
                 ('PR', 'PR'),
-                ('INDEX', '32'),
+                ('POS_INT', '32'),
             ])
 
     class TestInvalid(object):

@@ -8,8 +8,8 @@ literals = [
 """Language literals, i.e., the name is the same as the value."""
 
 tokens = {
-    # Indexes cannot be negative.
-    'INDEX': r'\d+',
+    'POS_INT': r'\d+',
+    'NEG_INT': r'-\d+',
     # Reals must include an integer part, so `.3' is not a valid real. It must
     # be `0.3'.
     'REAL': r'-?\d+\.\d*',
