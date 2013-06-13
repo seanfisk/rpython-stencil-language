@@ -193,7 +193,7 @@ def translate(options):
             cmd_flags += ['--output', metadata.package + '-jit', '--opt=jit']
         else:
             cmd_flags += ['--output', metadata.package]
-        cmd_line = (['translate.py'] + cmd_flags +
+        cmd_line = (['rpython'] + cmd_flags +
                     [os.path.join(CODE_DIRECTORY, 'main.py')])
         print_success_message('Translating: ' + ' '.join(cmd_line))
         subprocess.check_call(cmd_line, env=env)
