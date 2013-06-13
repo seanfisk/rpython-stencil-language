@@ -3,7 +3,7 @@
 Information describing the project.
 """
 
-# The package name, which is also the so-call "UNIX name" for the project.
+# The package name, which is also the "UNIX name" for the project.
 package = 'stencil_lang'
 project = "Stencil Language"
 project_no_spaces = project.replace(' ', '')
