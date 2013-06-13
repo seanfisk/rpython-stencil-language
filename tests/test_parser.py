@@ -2,6 +2,7 @@ from pytest import fixture, raises
 from rply import Token
 
 from stencil_lang.parser import parser, Context, ParseError
+from stencil_lang.errors import UninitializedRegisterError
 
 
 def assert_exc_info_msg(exc_info, expected_msg):
@@ -87,6 +88,18 @@ class TestParser(object):
             out, err = capsys.readouterr()
             assert out == '45.5\n99.9\n'
             assert err == ''
+
+        def test_add_without_sto_first(self, context):
+            with raises(UninitializedRegisterError) as exc_info:
+                parser.parse(make_token_iter([
+                    ('ADD', 'ADD'),
+                    ('POS_INT', '7'),
+                    ('REAL', '89.2'),
+                ]), context)
+            assert_exc_info_msg(
+                exc_info,
+                'Attempt to modify uninitialized register 7. '
+                'Please STO first.')
 
     class TestInvalid(object):
         def test_sto_neg_index(self, context):

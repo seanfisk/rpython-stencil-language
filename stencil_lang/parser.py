@@ -3,6 +3,7 @@ from rply.token import BaseBox
 
 from stencil_lang import metadata
 from stencil_lang.tokens import tokens
+from stencil_lang.errors import UninitializedRegisterError
 
 
 class ValueBox(BaseBox):
@@ -79,7 +80,10 @@ def pr(state, p):
 def add(state, p):
     index = p[1].get_value()
     number = p[2].get_value()
-    state.registers[index] += number
+    try:
+        state.registers[index] += number
+    except KeyError:
+        raise UninitializedRegisterError(index)
 
 
 @pg.production('number : int')
