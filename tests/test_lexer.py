@@ -28,6 +28,12 @@ class TestLexer(object):
         def test_sto(self):
             assert_lex_token_list('STO', [('STO', 'STO')])
 
+        def test_pr(self):
+            assert_lex_token_list('PR', [('PR', 'PR')])
+
+        def test_add(self):
+            assert_lex_token_list('ADD', [('ADD', 'ADD')])
+
         def test_pos_int(self):
             assert_lex_token_list('20', [('POS_INT', '20')])
 
@@ -41,11 +47,10 @@ class TestLexer(object):
             assert_lex_token_list('-078', [('NEG_INT', '-078')])
 
         def test_sto_pr(self):
-            code = '''
-    STO 1 32.3
-    PR 2
-    STO 10 -0.1
-    PR 32
+            code = '''STO 1 32.3
+PR 2
+STO 10 -0.1
+PR 32
     '''
             assert_lex_token_list(code, [
                 ('STO', 'STO'),

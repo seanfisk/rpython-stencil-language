@@ -4,6 +4,7 @@
 literals = [
     'STO',
     'PR',
+    'ADD',
 ]
 """Language literals, i.e., the name is the same as the value."""
 

@@ -57,6 +57,7 @@ def stmt_list(state, p):
 
 @pg.production('stmt : sto')
 @pg.production('stmt : pr')
+@pg.production('stmt : add')
 def stmt(state, p):
     pass
 
@@ -72,6 +73,13 @@ def sto(state, p):
 def pr(state, p):
     index = p[1].get_value()
     print state.registers[index]
+
+
+@pg.production('add : ADD index number')
+def add(state, p):
+    index = p[1].get_value()
+    number = p[2].get_value()
+    state.registers[index] += number
 
 
 @pg.production('number : int')

@@ -59,6 +59,35 @@ class TestParser(object):
             assert out == '-452.11\n'
             assert err == ''
 
+        def test_sto_add(self, context):
+            parser.parse(make_token_iter([
+                ('STO', 'STO'),
+                ('POS_INT', '10'),
+                ('NEG_INT', '-88'),
+                ('ADD', 'ADD'),
+                ('POS_INT', '10'),
+                ('REAL', '22.2'),
+            ]), context)
+            assert context.registers[10] == -65.8
+
+        def test_sto_pr_add_pr(self, context, capsys):
+            parser.parse(make_token_iter([
+                ('STO', 'STO'),
+                ('POS_INT', '10'),
+                ('REAL', '45.5'),
+                ('PR', 'PR'),
+                ('POS_INT', '10'),
+                ('ADD', 'ADD'),
+                ('POS_INT', '10'),
+                ('REAL', '54.4'),
+                ('PR', 'PR'),
+                ('POS_INT', '10'),
+            ]), context)
+            assert context.registers[10] == 99.9
+            out, err = capsys.readouterr()
+            assert out == '45.5\n99.9\n'
+            assert err == ''
+
     class TestInvalid(object):
         def test_sto_neg_index(self, context):
             with raises(ParseError) as exc_info:
