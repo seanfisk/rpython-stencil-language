@@ -6,8 +6,8 @@ import os
 import sys
 
 from stencil_lang import metadata
-from stencil_lang.lexer import generate_lexer
-from stencil_lang.parser import generate_parser, Context
+from stencil_lang.lexer import lexer
+from stencil_lang.parser import parser, Context
 
 
 def usage(argv):
@@ -57,12 +57,9 @@ URL: <%s>
             break
         source_code_list.append(read)
     os.close(input_fp)
+
     source_code = ''.join(source_code_list)
-
-    lexer = generate_lexer()
     stream = lexer.lex(source_code)
-
-    parser = generate_parser()
     default_context = Context()
     parser.parse(stream, default_context)
 

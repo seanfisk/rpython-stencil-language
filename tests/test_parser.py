@@ -1,7 +1,7 @@
 from pytest import fixture, raises
 from rply import Token
 
-from stencil_lang.parser import generate_parser, Context, ParseError
+from stencil_lang.parser import parser, Context, ParseError
 
 
 def assert_exc_info_msg(exc_info, expected_msg):
@@ -18,14 +18,9 @@ def context():
     return Context()
 
 
-@fixture
-def parser():
-    return generate_parser()
-
-
 class TestParser(object):
     class TestInstructions(object):
-        def test_sto(self, parser, context):
+        def test_sto(self, context):
             parser.parse(make_token_iter([
                 ('STO', 'STO'),
                 ('INDEX', '10'),
@@ -35,7 +30,7 @@ class TestParser(object):
             # test.
             assert context.registers[10] == -768.245
 
-        def test_sto_pr(self, parser, context, capsys):
+        def test_sto_pr(self, context, capsys):
             parser.parse(make_token_iter([
                 ('STO', 'STO'),
                 ('INDEX', '37'),
@@ -49,7 +44,7 @@ class TestParser(object):
             assert err == ''
 
     class TestErrors(object):
-        def test_end_of_one_line_program(self, parser, context):
+        def test_end_of_one_line_program(self, context):
             with raises(ParseError) as exc_info:
                 parser.parse(make_token_iter([
                     ('STO', 'STO'),
@@ -59,7 +54,7 @@ class TestParser(object):
             assert_exc_info_msg(
                 exc_info, "Unexpected `$end'")
 
-        def test_missing_pr_arg(self, parser, context):
+        def test_missing_pr_arg(self, context):
             with raises(ParseError) as exc_info:
                 parser.parse(make_token_iter([
                     ('STO', 'STO'),

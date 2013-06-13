@@ -7,11 +7,21 @@ from stencil_lang.tokens import tokens
 
 class ValueBox(BaseBox):
     def __init__(self, value):
-        self._value = value
+        self.value = value
 
-    @property
-    def value(self):
-        return self._value
+    def get_value(self):
+        return self.value
+
+# Thought IntBox and RealBox do the same thing, they both need to exist because
+# they hold different types.
+
+
+class IntBox(ValueBox):
+    pass
+
+
+class RealBox(ValueBox):
+    pass
 
 
 class Context(object):
@@ -51,25 +61,25 @@ def stmt(state, p):
 
 @pg.production('sto : STO index real')
 def sto(state, p):
-    index = p[1].value
-    real = p[2].value
+    index = p[1].get_value()
+    real = p[2].get_value()
     state.registers[index] = real
 
 
 @pg.production('pr : PR index')
 def pr(state, p):
-    index = p[1].value
+    index = p[1].get_value()
     print state.registers[index]
 
 
 @pg.production('real : REAL')
 def real(state, p):
-    return ValueBox(float(p[0].getstr()))
+    return RealBox(float(p[0].getstr()))
 
 
 @pg.production('index : INDEX')
 def index(state, p):
-    return ValueBox(int(p[0].getstr()))
+    return IntBox(int(p[0].getstr()))
 
 
 @pg.error
@@ -77,6 +87,7 @@ def error_handler(state, token):
     # NOTE: SourcePosition is a class, but it's not actually implemented :(
     raise ParseError(token.gettokentype())
 
-
-def generate_parser():
-    return pg.build()
+# This has to be called outside a function because the parser must be generated
+# in Python during translation, not in RPython during runtime.
+parser = pg.build()
+"""This intepreter's parser instance."""

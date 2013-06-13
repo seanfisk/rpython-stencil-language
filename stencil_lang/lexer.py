@@ -9,11 +9,7 @@ for rule_name, regex in tokens.iteritems():
 for regex in ignores:
     lg.ignore(regex)
 
-
-def generate_lexer():
-    """Generate a stencil language lexer.
-
-    :return: the lexer
-    :rtype: :class:`rlpy.lexer.Lexer`
-    """
-    return lg.build()
+# This has to be called outside a function because the parser must be generated
+# in Python during translation, not in RPython during runtime.
+lexer = lg.build()
+"""This intepreter's parser instance."""

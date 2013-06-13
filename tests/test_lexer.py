@@ -1,10 +1,10 @@
-from pytest import fixture, raises
+from pytest import raises
 from rply import Token
 
-from stencil_lang.lexer import generate_lexer
+from stencil_lang.lexer import lexer
 
 
-def assert_lex_token_list(lexer, code, expected_token_tuples):
+def assert_lex_token_list(code, expected_token_tuples):
     stream = lexer.lex(code)
 
     # For some reason, pytest always says there is a diff at index 0, even when
@@ -22,20 +22,15 @@ def assert_lex_token_list(lexer, code, expected_token_tuples):
         next(stream)
 
 
-@fixture
-def lexer():
-    return generate_lexer()
-
-
 class TestLexer(object):
-    def test_sto_pr(self, lexer):
+    def test_sto_pr(self):
         code = '''
 STO 1 32.3
 PR 2
 STO 10 -0.1
 PR 32
 '''
-        assert_lex_token_list(lexer, code, [
+        assert_lex_token_list(code, [
             ('STO', 'STO'),
             ('INDEX', '1'),
             ('REAL', '32.3'),
