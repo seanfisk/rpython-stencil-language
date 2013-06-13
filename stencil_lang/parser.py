@@ -7,10 +7,10 @@ from stencil_lang.tokens import tokens
 
 class ValueBox(BaseBox):
     def __init__(self, value):
-        self._value = value
+        self.value = value
 
-    def value(self):
-        return self._value
+    def get_value(self):
+        return self.value
 
 # Thought IntBox and RealBox do the same thing, they both need to exist because
 # they hold different types.
@@ -61,14 +61,14 @@ def stmt(state, p):
 
 @pg.production('sto : STO index real')
 def sto(state, p):
-    index = p[1].value()
-    real = p[2].value()
+    index = p[1].get_value()
+    real = p[2].get_value()
     state.registers[index] = real
 
 
 @pg.production('pr : PR index')
 def pr(state, p):
-    index = p[1].value()
+    index = p[1].get_value()
     print state.registers[index]
 
 
