@@ -183,6 +183,7 @@ def _big_text(text):
 ])
 def translate(options):
     """Translate the interpreter using the RPython toolchain."""
+    executable = 'rpython'
     try:
         cpus = get_num_cpus()
         # TODO: Will probably have to modify this to find RPython libraries.
@@ -193,7 +194,7 @@ def translate(options):
             cmd_flags += ['--output', metadata.package + '-jit', '--opt=jit']
         else:
             cmd_flags += ['--output', metadata.package]
-        cmd_line = (['rpython'] + cmd_flags +
+        cmd_line = ([executable] + cmd_flags +
                     [os.path.join(CODE_DIRECTORY, 'main.py')])
         print_success_message('Translating: ' + ' '.join(cmd_line))
         subprocess.check_call(cmd_line, env=env)
@@ -203,8 +204,8 @@ def translate(options):
             # (probably) means the system could not find the
             # executable.'`
             print_failure_message(
-                "Could not find PyPy `translate.py' executable. "
-                "Please ensure it is on your PATH.")
+                "Could not find PyPy `{0}' executable. "
+                "Please ensure it is on your PATH.".format(executable))
         else:
             # The error wasn't from being unable to locate the
             # executable. Re-raise the OSError.'
