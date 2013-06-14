@@ -3,16 +3,28 @@ from rply.token import BaseBox
 
 from stencil_lang import metadata
 from stencil_lang.tokens import tokens
+""":mod:`stencil_lang.parser` --- Parsing-related variables and classes
+"""
+
 from stencil_lang.errors import UninitializedRegisterError
 
 
 class ValueBox(BaseBox):
+    """Box that stores a single value."""
     def __init__(self, value):
+        """:param value: the value to store
+        :type value: :class:`object`
+        """
         self._value = value
 
     # Don't name this function `value'. RPython doesn't like it when
     # translating.
     def get_value(self):
+        """Get the value from the box.
+
+        :return: the value
+        :rtype: :class:`object`
+        """
         return self._value
 
 # Thought IntBox and RealBox do the same thing, they both need to exist because
@@ -20,10 +32,12 @@ class ValueBox(BaseBox):
 
 
 class IntBox(ValueBox):
+    """Store an integer."""
     pass
 
 
 class RealBox(ValueBox):
+    """Store a real number."""
     pass
 
 
@@ -31,10 +45,15 @@ class Context(object):
     """Execution context for the interpreter. Stores all global data."""
     def __init__(self):
         self.registers = {}
+        """Register bank for the interpreter."""
 
 
 class ParseError(Exception):
+    """Raised when parser encounters a generic issue."""
     def __init__(self, token_name):
+        """:param token_name: name of the token that caused the error
+        :type token_name: :class:`str`
+        """
         self._token_name = token_name
 
     def __str__(self):

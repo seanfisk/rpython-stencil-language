@@ -7,6 +7,7 @@ Contents:
    :maxdepth: 2
 
    lang_spec
+   api
 
 
 Indices and tables

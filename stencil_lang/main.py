@@ -11,6 +11,13 @@ from stencil_lang.parser import parser, Context
 
 
 def usage(argv):
+    """Print program usage information.
+
+    :param argv: command-line arguments
+    :type argv: :class:`list`
+    :return: the usage string
+    :rtype: :class:`str`
+    """
     return 'usage: %s INPUT_FILENAME' % argv[0]
 
 
@@ -19,6 +26,8 @@ def _main(argv):
 
     :param argv: command-line arguments
     :type argv: :class:`list`
+    :return: exit code
+    :rtype: :class:`int`
     """
     author_strings = []
     for i in xrange(len(metadata.authors)):
