@@ -67,6 +67,19 @@ class TestParser(object):
             assert out == '-452.11\n'
             assert err == ''
 
+        def test_pr_uninitialized(self, context, capsys):
+            with raises(UninitializedVariableError) as exc_info:
+                parser.parse(make_token_iter([
+                    lit('PR'),
+                    ('POS_INT', '6'),
+                ]), context)
+            assert_exc_info_msg(
+                exc_info, 'Register 6 is not initialized. Please STO first.')
+            # Should not have printed anything.
+            out, err = capsys.readouterr()
+            assert out == ''
+            assert err == ''
+
         def test_sto_add(self, context):
             parser.parse(make_token_iter([
                 lit('STO'),
@@ -139,6 +152,10 @@ class TestParser(object):
             assert_exc_info_msg(
                 exc_info,
                 'Array 20 is not initialized. Please CAR first.')
+            # Should not have printed anything.
+            out, err = capsys.readouterr()
+            assert out == ''
+            assert err == ''
 
     class TestInvalid(object):
         def test_sto_neg_index(self, context):

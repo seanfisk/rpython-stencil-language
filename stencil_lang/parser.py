@@ -138,7 +138,10 @@ def sto(state, p):
 @pg.production('pr : PR index')
 def pr(state, p):
     index = p[1].get_value()
-    print state.registers[index]
+    try:
+        print state.registers[index]
+    except KeyError:
+        raise UninitializedVariableError('register', index)
 
 
 @pg.production('add : ADD index number')
@@ -148,7 +151,7 @@ def add(state, p):
     try:
         state.registers[index] += number
     except KeyError:
-        raise UninitializedVariableError('register', index, 'STO')
+        raise UninitializedVariableError('register', index)
 
 
 @pg.production('car : CAR index pos_int pos_int')
@@ -168,7 +171,7 @@ def pa(state, p):
     try:
         print state.arrays[index]
     except KeyError:
-        raise UninitializedVariableError('array', index, 'CAR')
+        raise UninitializedVariableError('array', index)
 
 
 @pg.production('number : int')
