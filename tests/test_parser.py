@@ -121,8 +121,7 @@ class TestParser(object):
                     ('NEG_INT', '-37'),
                     ('REAL', '42.4'),
                 ]), context)
-            assert_exc_info_msg(
-                exc_info, "Unexpected `NEG_INT'")
+            assert_exc_info_msg(exc_info, "Unexpected `NEG_INT'")
 
         def test_end_of_one_line_program(self, context):
             with raises(ParseError) as exc_info:
@@ -131,8 +130,7 @@ class TestParser(object):
                     ('POS_INT', '37'),
                     # STO is missing a REAL argument
                 ]), context)
-            assert_exc_info_msg(
-                exc_info, "Unexpected `$end'")
+            assert_exc_info_msg(exc_info, "Unexpected `$end'")
 
         def test_missing_pr_arg(self, context):
             with raises(ParseError) as exc_info:
@@ -145,8 +143,17 @@ class TestParser(object):
                     lit('PR'),
                     ('POS_INT', '37'),
                 ]), context)
-            assert_exc_info_msg(
-                exc_info, "Unexpected `PR'")
+            assert_exc_info_msg(exc_info, "Unexpected `PR'")
+
+        def test_car_neg_dimension(self, context):
+            with raises(ParseError) as exc_info:
+                parser.parse(make_token_iter([
+                    lit('CAR'),
+                    ('POS_INT', '11'),
+                    ('POS_INT', '12'),
+                    ('NEG_INT', '-13'),
+                ]), context)
+            assert_exc_info_msg(exc_info, "Unexpected `NEG_INT'")
 
 
 class TestTwoDimArray(object):
