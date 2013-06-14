@@ -4,33 +4,28 @@ Currently contains only runtime errors.
 """
 
 
-class UninitializedRegisterError(Exception):
-    """Raised when a register is accessed without being initialized."""
-    def __init__(self, register_num):
-        """:param register_num: the register that was accessed
-        :type register_num: :class:`int`
+class UninitializedVariableError(Exception):
+    """Raised when a variable is accessed without being initialized."""
+    def __init__(self, type_, var_num, remedy):
+        """:param type_: type of the variable accessed, \
+        typically ``'register'`` or ``'array'``
+        :type type_: :class:`str`
+        :param var_num: the number of the variable accessed
+        :type var_num: :class:`int`
+        :param remedy: instruction to initialize it, \
+        typically ``'STO'`` or ``'CAR'``
+        :type rememdy: :class:`str`
         """
-        self._register_num = register_num
+        self._type = type_
+        self._var_num = var_num
+        self._remedy = remedy
 
     def __str__(self):
-        return ('Attempt to modify uninitialized register %d. '
-                'Please STO first.') % self._register_num
+        return ('%s %d is not initialized. Please %s first.') % (
+            self._type.capitalize(), self._var_num, self._remedy)
 
 
-class UninitializedArrayError(Exception):
-    """Raised when an array is accessed without being initialized."""
-    def __init__(self, array_num):
-        """:param array_num: the array that was accessed
-        :type array_num: :class:`int`
-        """
-        self._array_num = array_num
-
-    def __str__(self):
-        return ('Attempt to modify uninitialized array %d. '
-                'Please SAR first.') % self._array_num
-
-
-class InvalidArrayDimensions(Exception):
+class InvalidArrayDimensionsError(Exception):
     """Raised when an array is created with invalid dimensions."""
     def __init__(self, array_num, dimensions):
         """:param array_num: created array number

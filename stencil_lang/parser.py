@@ -7,9 +7,8 @@ from stencil_lang.tokens import tokens
 """
 
 from stencil_lang.errors import (
-    UninitializedRegisterError,
-    InvalidArrayDimensions,
-    UninitializedArrayError,
+    UninitializedVariableError,
+    InvalidArrayDimensionsError,
 )
 
 
@@ -149,7 +148,7 @@ def add(state, p):
     try:
         state.registers[index] += number
     except KeyError:
-        raise UninitializedRegisterError(index)
+        raise UninitializedVariableError('register', index, 'STO')
 
 
 @pg.production('car : CAR index pos_int pos_int')
@@ -159,7 +158,7 @@ def car(state, p):
     cols = p[3].get_value()
     dimensions = (rows, cols)
     if rows <= 0 or cols <= 0:
-        raise InvalidArrayDimensions(index, dimensions)
+        raise InvalidArrayDimensionsError(index, dimensions)
     state.arrays[index] = TwoDimArray(dimensions, [])
 
 
@@ -169,7 +168,7 @@ def pa(state, p):
     try:
         print state.arrays[index]
     except KeyError:
-        raise UninitializedArrayError(index)
+        raise UninitializedVariableError('array', index, 'CAR')
 
 
 @pg.production('number : int')
