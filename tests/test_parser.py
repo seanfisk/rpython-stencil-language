@@ -63,7 +63,6 @@ class TestParser(object):
                 lit('PR'),
                 ('POS_INT', '37'),
             ]), context)
-            assert context.registers[37] == -452.11
             out, err = capsys.readouterr()
             assert out == '-452.11\n'
             assert err == ''
