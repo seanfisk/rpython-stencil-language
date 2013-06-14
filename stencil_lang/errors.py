@@ -42,3 +42,19 @@ class InvalidArrayDimensionsError(Exception):
         return 'Invalid positive dimensions for array %d: %s' % (
             self._array_num,
             self._dimensions)
+
+
+class ArgumentError(Exception):
+    """Raised when an incorrect number of arguments is given."""
+    def __init__(self, num_args_required, num_args_given):
+        """:param num_args_required: Required number of args
+        :type num_args_required: :class:`int`
+        :param num_args_given: Given number of args
+        :type num_args_given: :class:`int`
+        """
+        self._num_args_required = num_args_required
+        self._num_args_given = num_args_given
+
+    def __str__(self):
+        return 'Takes exactly %d arguments (%d given)' % (
+            self._num_args_required, self._num_args_given)

@@ -9,6 +9,7 @@ from stencil_lang.tokens import tokens
 from stencil_lang.errors import (
     UninitializedVariableError,
     InvalidArrayDimensionsError,
+    ArgumentError,
 )
 
 
@@ -41,6 +42,11 @@ class IntBox(ValueBox):
 
 class RealBox(ValueBox):
     """Store a real number."""
+    pass
+
+
+class NumberListBox(ValueBox):
+    """Store a list of numbers."""
     pass
 
 
@@ -124,6 +130,7 @@ def stmt_list(state, p):
 @pg.production('stmt : add')
 @pg.production('stmt : car')
 @pg.production('stmt : pa')
+@pg.production('stmt : sar')
 def stmt(state, p):
     pass
 
@@ -172,6 +179,39 @@ def pa(state, p):
         print state.arrays[index]
     except KeyError:
         raise UninitializedVariableError('array', index)
+
+
+@pg.production('sar : SAR index number_list')
+def sar(state, p):
+    index = p[1].get_value()
+    number_list = p[2].get_value()
+    try:
+        two_dim_array = state.arrays[index]
+    except KeyError:
+        raise UninitializedVariableError('array', index)
+    dimensions = two_dim_array.dimensions
+    num_required_args = dimensions[0] * dimensions[1]
+    num_given_args = len(number_list)
+    if num_given_args != num_required_args:
+        raise ArgumentError(num_required_args, num_given_args)
+    two_dim_array.contents = number_list
+
+
+# number_list must come after number so that it can initially create for
+# insertion.
+@pg.production('number_list : number number_list')
+@pg.production('number_list : number')
+def number_list(state, p):
+    if len(p) == 2:
+        # number_list : number number_list
+        number = p[0].get_value()
+        number_list_box = p[1]
+        number_list_box.get_value().insert(0, number)
+        return number_list_box
+
+    # number_list : number
+    number = p[0].get_value()
+    return NumberListBox([number])
 
 
 @pg.production('number : int')

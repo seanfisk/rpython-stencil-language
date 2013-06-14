@@ -42,6 +42,9 @@ class TestLexer(object):
         def test_pa(self):
             assert_lex_token_list('PA', [lit('PA')])
 
+        def test_sar(self):
+            assert_lex_token_list('SAR', [lit('SAR')])
+
         def test_pos_int(self):
             assert_lex_token_list('20', [('POS_INT', '20')])
 

@@ -7,6 +7,7 @@ from stencil_lang.parser import parser, Context, ParseError, TwoDimArray
 from stencil_lang.errors import (
     UninitializedVariableError,
     InvalidArrayDimensionsError,
+    ArgumentError,
 )
 
 from tests.helpers import lit
@@ -109,7 +110,7 @@ class TestParser(object):
             assert out == '45.5\n99.9\n'
             assert err == ''
 
-        def test_add_without_sto_first(self, context):
+        def test_add_uninitialized(self, context):
             with raises(UninitializedVariableError) as exc_info:
                 parser.parse(make_token_iter([
                     lit('ADD'),
@@ -156,6 +157,87 @@ class TestParser(object):
             out, err = capsys.readouterr()
             assert out == ''
             assert err == ''
+
+        def test_sar(self, context):
+            parser.parse(make_token_iter([
+                lit('CAR'),
+                ('POS_INT', '31'),
+                ('POS_INT', '2'),
+                ('POS_INT', '3'),
+                lit('SAR'),
+                ('POS_INT', '31'),
+                # Contents
+                ('REAL', '-13.4'),
+                ('POS_INT', '9876'),
+                ('REAL', '45.234'),
+                ('POS_INT', '-42'),
+                ('REAL', '34.8'),
+                ('REAL', '-88.2'),
+            ]), context)
+            assert context.arrays[31] == TwoDimArray((2, 3), [
+                -13.4, 9876, 45.234, -42, 34.8, -88.2
+            ])
+
+        def test_sar_incorrect_number_of_arguments(self, context):
+            with raises(ArgumentError) as exc_info:
+                parser.parse(make_token_iter([
+                    lit('CAR'),
+                    ('POS_INT', '31'),
+                    ('POS_INT', '2'),
+                    ('POS_INT', '3'),
+                    lit('SAR'),
+                    ('POS_INT', '31'),
+                    # Contents
+                    ('REAL', '-13.4'),
+                    ('POS_INT', '9876'),
+                    ('REAL', '45.234'),
+                    ('POS_INT', '-42'),
+                    ('REAL', '34.8'),
+                    # Missing one
+                ]), context)
+            assert_exc_info_msg(
+                exc_info, 'Takes exactly 6 arguments (5 given)')
+
+        def test_car_sar_pa(self, context, capsys):
+            parser.parse(make_token_iter([
+                lit('CAR'),
+                ('POS_INT', '31'),
+                ('POS_INT', '2'),
+                ('POS_INT', '3'),
+                lit('SAR'),
+                ('POS_INT', '31'),
+                # Contents
+                ('REAL', '-13.4'),
+                ('POS_INT', '9876'),
+                ('REAL', '45.234'),
+                ('POS_INT', '-42'),
+                ('REAL', '34.8'),
+                ('REAL', '-88.2'),
+                lit('PA'),
+                ('POS_INT', '31'),
+            ]), context)
+            out, err = capsys.readouterr()
+            assert out == '''[[-13.4 9876 45.234]
+[-42 34.8 -88.2]]
+'''
+            assert err == ''
+
+        def test_sar_uninitialized(self, context):
+            with raises(UninitializedVariableError) as exc_info:
+                parser.parse(make_token_iter([
+                    lit('SAR'),
+                    ('POS_INT', '7'),
+                    # We don't know how large an uninitialized array is, so
+                    # there isn't even a "right" amount of arguments we could
+                    # give here.
+                    ('POS_INT', '1'),
+                    ('POS_INT', '10'),
+                    ('POS_INT', '71'),
+                    ('NEG_INT', '-32'),
+                ]), context)
+            assert_exc_info_msg(
+                exc_info,
+                'Array 7 is not initialized. Please CAR first.')
 
     class TestInvalid(object):
         def test_sto_neg_index(self, context):
