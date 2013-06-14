@@ -46,6 +46,31 @@ class Context(object):
     def __init__(self):
         self.registers = {}
         """Register bank for the interpreter."""
+        self.arrays = {}
+        """Array bank for the interpreter."""
+
+
+# Can't start a class name with a number.
+class TwoDimArray(object):
+    """Array object for the interpreter."""
+    def __init__(self, dimensions, init_contents):
+        """:param dimensions: dimensions of the array
+        :type dimensions: :class:`tuple` of (:class:`int`, :class:`int`)
+        :param init_contents: initial contents of the array
+        :type init_contents: :class:`list`
+        """
+        self.dimensions = dimensions
+        """Dimensions of the array."""
+        self.contents = init_contents
+        """Contents of the array, stored as a flat list."""
+
+    def __eq__(self, other):
+        return (self.dimensions == other.dimensions and
+                self.contents == other.contents)
+
+    def __repr__(self):
+        return '%s(%s, %s)' % (
+            type(self).__name__, self.dimensions, self.contents)
 
 
 class ParseError(Exception):
@@ -78,6 +103,7 @@ def stmt_list(state, p):
 @pg.production('stmt : sto')
 @pg.production('stmt : pr')
 @pg.production('stmt : add')
+@pg.production('stmt : car')
 def stmt(state, p):
     pass
 
@@ -105,6 +131,14 @@ def add(state, p):
         raise UninitializedRegisterError(index)
 
 
+@pg.production('car : CAR index pos_int pos_int')
+def car(state, p):
+    index = p[1].get_value()
+    rows = p[2].get_value()
+    cols = p[3].get_value()
+    state.arrays[index] = TwoDimArray((rows, cols), [])
+
+
 @pg.production('number : int')
 @pg.production('number : real')
 def number(state, p):
@@ -119,6 +153,7 @@ def real(state, p):
 @pg.production('int : POS_INT')
 @pg.production('int : NEG_INT')
 @pg.production('index : POS_INT')
+@pg.production('pos_int : POS_INT')
 def int_(state, p):
     return IntBox(int(p[0].getstr()))
 
