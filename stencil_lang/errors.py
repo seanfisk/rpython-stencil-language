@@ -15,3 +15,20 @@ class UninitializedRegisterError(Exception):
     def __str__(self):
         return ('Attempt to modify uninitialized register %d. '
                 'Please STO first.') % self._register_num
+
+
+class InvalidArrayDimensions(Exception):
+    """Raised when an array is created with invalid dimensions."""
+    def __init__(self, array_num, dimensions):
+        """:param array_num: created array number
+        :type array_num: :class:`int`
+        :param dimensions: new dimensions of array
+        :type dimensions: :class:`tuple` of (:class:`int`, :class:`int`)
+        """
+        self._array_num = array_num
+        self._dimensions = dimensions
+
+    def __str__(self):
+        return 'Invalid positive dimensions for array %d: %s' % (
+            self._array_num,
+            self._dimensions)

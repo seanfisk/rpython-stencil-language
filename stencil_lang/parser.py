@@ -6,7 +6,10 @@ from stencil_lang.tokens import tokens
 """:mod:`stencil_lang.parser` --- Parsing-related variables and classes
 """
 
-from stencil_lang.errors import UninitializedRegisterError
+from stencil_lang.errors import (
+    UninitializedRegisterError,
+    InvalidArrayDimensions,
+)
 
 
 class ValueBox(BaseBox):
@@ -136,7 +139,10 @@ def car(state, p):
     index = p[1].get_value()
     rows = p[2].get_value()
     cols = p[3].get_value()
-    state.arrays[index] = TwoDimArray((rows, cols), [])
+    dimensions = (rows, cols)
+    if rows <= 0 or cols <= 0:
+        raise InvalidArrayDimensions(index, dimensions)
+    state.arrays[index] = TwoDimArray(dimensions, [])
 
 
 @pg.production('number : int')

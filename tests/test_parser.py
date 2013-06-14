@@ -2,7 +2,10 @@ from pytest import fixture, raises
 from rply import Token
 
 from stencil_lang.parser import parser, Context, ParseError, TwoDimArray
-from stencil_lang.errors import UninitializedRegisterError
+from stencil_lang.errors import (
+    UninitializedRegisterError,
+    InvalidArrayDimensions,
+)
 
 from tests.helpers import lit
 
@@ -154,6 +157,28 @@ class TestParser(object):
                     ('NEG_INT', '-13'),
                 ]), context)
             assert_exc_info_msg(exc_info, "Unexpected `NEG_INT'")
+
+        def test_car_zero_rows(self, context):
+            with raises(InvalidArrayDimensions) as exc_info:
+                parser.parse(make_token_iter([
+                    lit('CAR'),
+                    ('POS_INT', '11'),
+                    ('POS_INT', '0'),
+                    ('POS_INT', '32'),
+                ]), context)
+            assert_exc_info_msg(
+                exc_info, "Invalid positive dimensions for array 11: (0, 32)")
+
+        def test_car_zero_cols(self, context):
+            with raises(InvalidArrayDimensions) as exc_info:
+                parser.parse(make_token_iter([
+                    lit('CAR'),
+                    ('POS_INT', '11'),
+                    ('POS_INT', '7'),
+                    ('POS_INT', '0'),
+                ]), context)
+            assert_exc_info_msg(
+                exc_info, "Invalid positive dimensions for array 11: (7, 0)")
 
 
 class TestTwoDimArray(object):
