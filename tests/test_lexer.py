@@ -39,6 +39,9 @@ class TestLexer(object):
         def test_car(self):
             assert_lex_token_list('CAR', [lit('CAR')])
 
+        def test_pa(self):
+            assert_lex_token_list('PA', [lit('PA')])
+
         def test_pos_int(self):
             assert_lex_token_list('20', [('POS_INT', '20')])
 

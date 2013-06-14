@@ -6,6 +6,7 @@ literals = [
     'PR',
     'ADD',
     'CAR',
+    'PA',
 ]
 """Language literals, i.e., the name is the same as the value."""
 

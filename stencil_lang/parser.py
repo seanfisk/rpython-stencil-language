@@ -9,6 +9,7 @@ from stencil_lang.tokens import tokens
 from stencil_lang.errors import (
     UninitializedRegisterError,
     InvalidArrayDimensions,
+    UninitializedArrayError,
 )
 
 
@@ -123,6 +124,7 @@ def stmt_list(state, p):
 @pg.production('stmt : pr')
 @pg.production('stmt : add')
 @pg.production('stmt : car')
+@pg.production('stmt : pa')
 def stmt(state, p):
     pass
 
@@ -159,6 +161,15 @@ def car(state, p):
     if rows <= 0 or cols <= 0:
         raise InvalidArrayDimensions(index, dimensions)
     state.arrays[index] = TwoDimArray(dimensions, [])
+
+
+@pg.production('pa : PA index')
+def pa(state, p):
+    index = p[1].get_value()
+    try:
+        print state.arrays[index]
+    except KeyError:
+        raise UninitializedArrayError(index)
 
 
 @pg.production('number : int')

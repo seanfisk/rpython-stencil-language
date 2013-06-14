@@ -7,6 +7,7 @@ from stencil_lang.parser import parser, Context, ParseError, TwoDimArray
 from stencil_lang.errors import (
     UninitializedRegisterError,
     InvalidArrayDimensions,
+    UninitializedArrayError,
 )
 
 from tests.helpers import lit
@@ -116,6 +117,30 @@ class TestParser(object):
                 ('POS_INT', '11'),
             ]), context)
             assert context.arrays[22] == TwoDimArray((33, 11), [])
+
+        def test_pa_empty(self, context, capsys):
+            parser.parse(make_token_iter([
+                lit('CAR'),
+                ('POS_INT', '40'),
+                ('POS_INT', '22'),
+                ('POS_INT', '78'),
+                lit('PA'),
+                ('POS_INT', '40'),
+            ]), context)
+            out, err = capsys.readouterr()
+            # Should call TwoDimArray.__str__ and add a newline.
+            assert out == 'Unpopulated array of dimensions (22, 78)\n'
+            assert err == ''
+
+        def test_pa_uninitialized_array(self, context, capsys):
+            with raises(UninitializedArrayError) as exc_info:
+                parser.parse(make_token_iter([
+                    lit('PA'),
+                    ('POS_INT', '20'),
+                ]), context)
+            assert_exc_info_msg(
+                exc_info,
+                'Attempt to modify uninitialized array 20. Please SAR first.')
 
     class TestInvalid(object):
         def test_sto_neg_index(self, context):
