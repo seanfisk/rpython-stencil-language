@@ -75,6 +75,22 @@ class TwoDimArray(object):
         return '%s(%s, %s)' % (
             type(self).__name__, self.dimensions, self.contents)
 
+    def __str__(self):
+        if self.contents == []:
+            return 'Unpopulated array of dimensions %s' % (self.dimensions, )
+        rows, cols = self.dimensions
+        row_strs = []
+        for r in xrange(rows):
+            this_row_index = r * cols
+            next_row_index = (r + 1) * cols
+            nums_str_list = [
+                str(num) for num in
+                self.contents[this_row_index:next_row_index]]
+            nums_str = ' '.join(nums_str_list)
+            row_strs.append('[%s]' % nums_str)
+
+        return '[%s]' % '\n'.join(row_strs)
+
 
 class ParseError(Exception):
     """Raised when parser encounters a generic issue."""
