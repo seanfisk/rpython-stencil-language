@@ -1,8 +1,6 @@
 """:mod:`stencil_lang.parser` --- Parsing-related variables and classes
 """
 
-# import copy
-
 from rply import ParserGenerator
 from rply.token import BaseBox
 
@@ -14,24 +12,6 @@ from stencil_lang.errors import (
     ArgumentError,
 )
 
-
-# class ValueBox(BaseBox):
-#     """Box that stores a single value."""
-#     def __init__(self, value):
-#         """:param value: the value to store
-#         :type value: :class:`object`
-#         """
-#         self._value = value
-
-#     # Don't name this function `value'. RPython doesn't like it when
-#     # translating.
-#     def get_value(self):
-#         """Get the value from the box.
-
-#         :return: the value
-#         :rtype: :class:`object`
-#         """
-#         return self._value
 
 # Thought these boxes do the same thing, they all need to exist because they
 # hold different types. In addition, a separate __init__ and accessors with
@@ -45,57 +25,22 @@ from stencil_lang.errors import (
 # * Creating a no-op class which just inherits from a ValueBox that has
 #   __init__ and get_value.
 # * Creating classes using metaprogramming deep-copied from ValueBox.
-
-# def value_box_init(self, value):
-#     self._value = value
-
-# def value_box_get_value(self):
-#     """Get the value from the box.
-
-#     :return: the value
-#     :rtype: :class:`object`
-#     """
-#     return self._value
-
-# for box_name in ['number', 'list']:
-#     new_value_box_class = copy.deepcopy(ValueBox)
-#     # new_value_box_class = copy.deepcopy(BaseBox)
-#     setattr(new_value_box_class, 'get_%s' % box_name, value_box_get_value)
-#     globals()['%sBox' % box_name.capitalize()] = new_value_box_class
-
-# class IntBox(BaseBox):
-#     """Store an integer."""
-#     def __init__(self, value):
-#         """:param value: the value to store
-#         :type value: :class:`object`
-#         """
-#         self._value = value
-
-#     # Don't name this function `value'. RPython doesn't like it when
-#     # translating.
-#     def get_value(self):
-#         """Get the value from the box.
-
-#         :return: the value
-#         :rtype: :class:`object`
-#         """
-#         return self._value
+# * Creating classes using metaprogramming deep-copied from BaseBox, then
+#   assigning __init__ and get_* methods to them.
 
 class NumberBox(BaseBox):
-    """Store a number: int of float."""
+    """Store a number: int or float."""
     def __init__(self, value):
-        """:param value: the value to store
-        :type value: :class:`object`
+        """:param value: the number to store
+        :type value: :class:`int` or :class:`float`
         """
         self._value = value
 
-    # Don't name this function `value'. RPython doesn't like it when
-    # translating.
     def get_number(self):
         """Get the value from the box.
 
         :return: the value
-        :rtype: :class:`object`
+        :rtype: :class:`int` or :class:`float`
         """
         return self._value
 
@@ -104,17 +49,15 @@ class ListBox(BaseBox):
     """Store a list of numbers."""
     def __init__(self, value):
         """:param value: the value to store
-        :type value: :class:`object`
+        :type value: :class:`list`
         """
         self._value = value
 
-    # Don't name this function `value'. RPython doesn't like it when
-    # translating.
     def get_list(self):
         """Get the value from the box.
 
         :return: the value
-        :rtype: :class:`object`
+        :rtype: :class:`list`
         """
         return self._value
 
