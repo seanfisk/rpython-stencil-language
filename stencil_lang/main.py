@@ -8,6 +8,7 @@ import sys
 from stencil_lang import metadata
 from stencil_lang.lexer import lexer
 from stencil_lang.parser import parser, Context
+from stencil_lang.errors import StencilLanguageError
 
 
 def usage(argv):
@@ -70,7 +71,19 @@ URL: <%s>
     source_code = ''.join(source_code_list)
     stream = lexer.lex(source_code)
     default_context = Context()
-    parser.parse(stream, default_context)
+    try:
+        parser.parse(stream, default_context)
+    except StencilLanguageError as error:
+        # The purpose of this except block is two-fold:
+        #
+        # * Don't print tracebacks for interpreter errors. Tracebacks shouldn't
+        #   be shown to the user.
+        # * RPython doesn't honor most magic methods including __str__ and
+        #   __repr__, so error messages aren't shown to the user when using the
+        #   translated executable. Only the exception name is shown.
+
+        # TODO: This should print to stderr.
+        print '%s: %s' % (error.name, error.__str__())
 
     return 0
 

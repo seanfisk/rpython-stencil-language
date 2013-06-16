@@ -10,6 +10,7 @@ from stencil_lang.errors import (
     UninitializedVariableError,
     InvalidArrayDimensionsError,
     ArgumentError,
+    ParseError,
 )
 
 
@@ -17,8 +18,9 @@ from stencil_lang.errors import (
 # hold different types. In addition, a separate __init__ and accessors with
 # _different names_ need to exist for each box.
 #
-# float and int seem to be OK to put in the same NumberBox. I'm not sure if
-# that's just a consequence of how I'm using them.
+# float and int initially might seem to be OK to put in the same
+# NumberBox. However, I think RPython just casts to float which presents some
+# problems, for example, in the error message string formatting.
 #
 # The following things don't work:
 #
@@ -28,19 +30,36 @@ from stencil_lang.errors import (
 # * Creating classes using metaprogramming deep-copied from BaseBox, then
 #   assigning __init__ and get_* methods to them.
 
-class NumberBox(BaseBox):
-    """Store a number: int or float."""
+class IntBox(BaseBox):
+    """Store an integer."""
     def __init__(self, value):
         """:param value: the number to store
-        :type value: :class:`int` or :class:`float`
+        :type value: :class:`int`
         """
         self._value = value
 
-    def get_number(self):
+    def get_int(self):
         """Get the value from the box.
 
         :return: the value
-        :rtype: :class:`int` or :class:`float`
+        :rtype: :class:`int`
+        """
+        return self._value
+
+
+class FloatBox(BaseBox):
+    """Store a floating-point real number."""
+    def __init__(self, value):
+        """:param value: the number to store
+        :type value: :class:`float`
+        """
+        self._value = value
+
+    def get_float(self):
+        """Get the value from the box.
+
+        :return: the value
+        :rtype: :class:`float`
         """
         return self._value
 
@@ -74,33 +93,42 @@ class Context(object):
 # Can't start a class name with a number.
 class TwoDimArray(object):
     """Array object for the interpreter."""
-    def __init__(self, dimensions, init_contents):
-        """:param dimensions: dimensions of the array
-        :type dimensions: :class:`tuple` of (:class:`int`, :class:`int`)
+    def __init__(self, rows, cols, init_contents):
+        """:param rows: number of rows in the array
+        :type rows: :class:`int`
+        :param cols: number of columns in the array
+        :type cols: :class:`int`
         :param init_contents: initial contents of the array
         :type init_contents: :class:`list`
         """
-        self.dimensions = dimensions
-        """Dimensions of the array."""
+        # I'd prefer to have a dimensions tuple, but RPython loses track of
+        # whether they are positive or negative when inserted into a tuple.
+        self.rows = rows
+        """Number of rows in the array."""
+        self.cols = cols
+        """Number of columns in the array."""
         self.contents = init_contents
         """Contents of the array, stored as a flat list."""
 
     def __eq__(self, other):
-        return (self.dimensions == other.dimensions and
+        # RPython does not honor this method, so it is mostly for testing.
+        return (self.rows == other.rows and self.cols == other.cols and
                 self.contents == other.contents)
 
     def __repr__(self):
-        return '%s(%s, %s)' % (
-            type(self).__name__, self.dimensions, self.contents)
+        # RPython does not honor this method, so it is mostly for testing.
+        return '%s(%d, %d, %s)' % (
+            type(self).__name__, self.rows, self.cols, self.contents)
 
     def __str__(self):
+        # RPython does not honor this method, but we call it directly.
         if self.contents == []:
-            return 'Unpopulated array of dimensions %s' % (self.dimensions, )
-        rows, cols = self.dimensions
+            return 'Unpopulated array of dimensions %s' % (
+                (self.rows, self.cols), )
         row_strs = []
-        for r in xrange(rows):
-            this_row_index = r * cols
-            next_row_index = (r + 1) * cols
+        for r in xrange(self.rows):
+            this_row_index = r * self.cols
+            next_row_index = (r + 1) * self.cols
             nums_str_list = [
                 str(num) for num in
                 self.contents[this_row_index:next_row_index]]
@@ -108,18 +136,6 @@ class TwoDimArray(object):
             row_strs.append('[%s]' % nums_str)
 
         return '[%s]' % '\n'.join(row_strs)
-
-
-class ParseError(Exception):
-    """Raised when parser encounters a generic issue."""
-    def __init__(self, token_name):
-        """:param token_name: name of the token that caused the error
-        :type token_name: :class:`str`
-        """
-        self._token_name = token_name
-
-    def __str__(self):
-        return "Unexpected `%s'" % self._token_name
 
 
 pg = ParserGenerator(tokens.keys(), cache_id=metadata.package)
@@ -149,62 +165,61 @@ def stmt(state, p):
 
 @pg.production('sto : STO index number')
 def sto(state, p):
-    index = p[1].get_number()
-    number = p[2].get_number()
+    index = p[1].get_int()
+    number = p[2].get_int() if isinstance(p[2], IntBox) else p[2].get_float()
     state.registers[index] = number
 
 
 @pg.production('pr : PR index')
 def pr(state, p):
-    index = p[1].get_number()
+    index = p[1].get_int()
     try:
         print state.registers[index]
     except KeyError:
-        raise UninitializedVariableError('register', index)
+        raise UninitializedVariableError('Register', index)
 
 
 @pg.production('add : ADD index number')
 def add(state, p):
-    index = p[1].get_number()
-    number = p[2].get_number()
+    index = p[1].get_int()
+    # number = p[2].get_number()
+    number = p[2].get_int() if isinstance(p[2], IntBox) else p[2].get_float()
     try:
         state.registers[index] += number
     except KeyError:
-        raise UninitializedVariableError('register', index)
+        raise UninitializedVariableError('Register', index)
 
 
 @pg.production('car : CAR index pos_int pos_int')
 def car(state, p):
-    index = p[1].get_number()
-    rows = p[2].get_number()
-    cols = p[3].get_number()
-    dimensions = (rows, cols)
+    index = p[1].get_int()
+    rows = p[2].get_int()
+    cols = p[3].get_int()
     if rows <= 0 or cols <= 0:
-        raise InvalidArrayDimensionsError(index, dimensions)
-    state.arrays[index] = TwoDimArray(dimensions, [])
+        raise InvalidArrayDimensionsError(index, (rows, cols))
+    state.arrays[index] = TwoDimArray(rows, cols, [])
 
 
 @pg.production('pa : PA index')
 def pa(state, p):
-    index = p[1].get_number()
+    index = p[1].get_int()
     try:
         # RPython does not honor most magic methods. Hence, just `print' will
         # work in tests but not when translated.
         print state.arrays[index].__str__()
     except KeyError:
-        raise UninitializedVariableError('array', index)
+        raise UninitializedVariableError('Array', index)
 
 
 @pg.production('sar : SAR index number_list')
 def sar(state, p):
-    index = p[1].get_number()
+    index = p[1].get_int()
     number_list = p[2].get_list()
     try:
         two_dim_array = state.arrays[index]
     except KeyError:
-        raise UninitializedVariableError('array', index)
-    dimensions = two_dim_array.dimensions
-    num_required_args = dimensions[0] * dimensions[1]
+        raise UninitializedVariableError('Array', index)
+    num_required_args = two_dim_array.rows * two_dim_array.cols
     num_given_args = len(number_list)
     if num_given_args != num_required_args:
         raise ArgumentError(num_required_args, num_given_args)
@@ -216,7 +231,7 @@ def sar(state, p):
 @pg.production('number_list : number number_list')
 @pg.production('number_list : number')
 def number_list(state, p):
-    number = p[0].get_number()
+    number = p[0].get_int() if isinstance(p[0], IntBox) else p[0].get_float()
     if len(p) == 2:
         # number_list : number number_list
         number_list_box = p[1]
@@ -244,7 +259,7 @@ def number(state, p):
 
 @pg.production('real : REAL')
 def real(state, p):
-    return NumberBox(float(p[0].getstr()))  # NOQA
+    return FloatBox(float(p[0].getstr()))
 
 
 @pg.production('int : POS_INT')
@@ -252,7 +267,7 @@ def real(state, p):
 @pg.production('index : POS_INT')
 @pg.production('pos_int : POS_INT')
 def int_(state, p):
-    return NumberBox(int(p[0].getstr()))  # NOQA
+    return IntBox(int(p[0].getstr()))
 
 
 @pg.error
