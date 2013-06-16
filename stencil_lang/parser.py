@@ -277,5 +277,16 @@ def error_handler(state, token):
 
 # This has to be called outside a function because the parser must be generated
 # in Python during translation, not in RPython during runtime.
-parser = pg.build()
+_parser = pg.build()
 """This intepreter's parser instance."""
+
+
+def parse(text, state):
+    """Parse and interpret text using the generated parser.
+
+    :param text: text to parse
+    :type text: :class:`str`
+    :param state: state to pass to the parser
+    :type state: :class:`object`
+    """
+    _parser.parse(text, state)

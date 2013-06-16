@@ -6,8 +6,8 @@ import os
 import sys
 
 from stencil_lang import metadata
-from stencil_lang.lexer import lexer
-from stencil_lang.parser import parser, Context
+from stencil_lang.lexer import lex
+from stencil_lang.parser import parse, Context
 from stencil_lang.errors import StencilLanguageError
 
 
@@ -69,10 +69,10 @@ URL: <%s>
     os.close(input_fp)
 
     source_code = ''.join(source_code_list)
-    stream = lexer.lex(source_code)
+    stream = lex(source_code)
     default_context = Context()
     try:
-        parser.parse(stream, default_context)
+        parse(stream, default_context)
     except StencilLanguageError as error:
         # The purpose of this except block is two-fold:
         #

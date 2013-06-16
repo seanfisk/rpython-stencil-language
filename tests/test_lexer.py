@@ -2,19 +2,19 @@ from pytest import raises
 from rply import Token
 from rply.errors import LexingError
 
-from stencil_lang.lexer import lexer
+from stencil_lang.lexer import lex
 
 from tests.helpers import lit
 
 
 def assert_lex_token_list(code, expected_token_tuples):
-    stream = lexer.lex(code)
+    stream = lex(code)
 
     # For some reason, pytest always says there is a diff at index 0, even when
     # it occurs elsewhere in the list. Falling back to asserting in a loop.
     # expected_tokens = [
     #     Token(name, value) for name, value in expected_token_tuples]
-    # assert list(lexer.lex(code)) == expected_tokens
+    # assert list(lex(code)) == expected_tokens
 
     for name, value in expected_token_tuples:
         computed_token = next(stream)
@@ -95,31 +95,31 @@ ADD 1 2.2
 
     class TestInvalid(object):
         def test_nothing(self):
-            stream = lexer.lex('')
+            stream = lex('')
             with raises(StopIteration):
                 next(stream)
 
         def test_invalid_token(self):
-            stream = lexer.lex('ABCD')
+            stream = lex('ABCD')
             with raises(LexingError):
                 next(stream)
 
         def test_invalid_sto(self):
-            stream = lexer.lex('STO 1 hello')
+            stream = lex('STO 1 hello')
             for _ in xrange(2):
                 next(stream)
             with raises(LexingError):
                 next(stream)
 
         def test_invalid_next_instruction(self):
-            stream = lexer.lex('STO 1 123.3\nawesome')
+            stream = lex('STO 1 123.3\nawesome')
             for _ in xrange(3):
                 next(stream)
             with raises(LexingError):
                 next(stream)
 
         def test_invalid_continues_to_raise_lexing_errors(self):
-            stream = lexer.lex('ABCD')
+            stream = lex('ABCD')
             for _ in xrange(5):
                 with raises(LexingError):
                     next(stream)

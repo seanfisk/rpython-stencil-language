@@ -3,7 +3,7 @@ from pprint import isreadable
 from pytest import fixture, raises
 from rply import Token
 
-from stencil_lang.parser import parser, Context, ParseError, TwoDimArray
+from stencil_lang.parser import parse, Context, ParseError, TwoDimArray
 from stencil_lang.errors import (
     UninitializedVariableError,
     InvalidArrayDimensionsError,
@@ -30,7 +30,7 @@ def context():
 class TestParser(object):
     class TestValid(object):
         def test_sto_real(self, context):
-            parser.parse(make_token_iter([
+            parse(make_token_iter([
                 lit('STO'),
                 ('POS_INT', '10'),
                 ('REAL', '-768.245'),
@@ -40,7 +40,7 @@ class TestParser(object):
             assert context.registers[10] == -768.245
 
         def test_sto_pos_int(self, context):
-            parser.parse(make_token_iter([
+            parse(make_token_iter([
                 lit('STO'),
                 ('POS_INT', '10'),
                 ('POS_INT', '32'),
@@ -48,7 +48,7 @@ class TestParser(object):
             assert context.registers[10] == 32
 
         def test_sto_neg_int(self, context):
-            parser.parse(make_token_iter([
+            parse(make_token_iter([
                 lit('STO'),
                 ('POS_INT', '10'),
                 ('NEG_INT', '-88'),
@@ -56,7 +56,7 @@ class TestParser(object):
             assert context.registers[10] == -88
 
         def test_sto_pr(self, context, capsys):
-            parser.parse(make_token_iter([
+            parse(make_token_iter([
                 lit('STO'),
                 ('POS_INT', '37'),
                 ('REAL', '-452.11'),
@@ -69,7 +69,7 @@ class TestParser(object):
 
         def test_pr_uninitialized(self, context, capsys):
             with raises(UninitializedVariableError) as exc_info:
-                parser.parse(make_token_iter([
+                parse(make_token_iter([
                     lit('PR'),
                     ('POS_INT', '6'),
                 ]), context)
@@ -81,7 +81,7 @@ class TestParser(object):
             assert err == ''
 
         def test_sto_add(self, context):
-            parser.parse(make_token_iter([
+            parse(make_token_iter([
                 lit('STO'),
                 ('POS_INT', '10'),
                 ('NEG_INT', '-88'),
@@ -92,7 +92,7 @@ class TestParser(object):
             assert context.registers[10] == -65.8
 
         def test_sto_pr_add_pr(self, context, capsys):
-            parser.parse(make_token_iter([
+            parse(make_token_iter([
                 lit('STO'),
                 ('POS_INT', '10'),
                 ('REAL', '45.5'),
@@ -111,7 +111,7 @@ class TestParser(object):
 
         def test_add_uninitialized(self, context):
             with raises(UninitializedVariableError) as exc_info:
-                parser.parse(make_token_iter([
+                parse(make_token_iter([
                     lit('ADD'),
                     ('POS_INT', '7'),
                     ('REAL', '89.2'),
@@ -121,7 +121,7 @@ class TestParser(object):
                 'Register 7 is not initialized. Please STO first.')
 
         def test_car(self, context):
-            parser.parse(make_token_iter([
+            parse(make_token_iter([
                 lit('CAR'),
                 ('POS_INT', '22'),
                 ('POS_INT', '33'),
@@ -130,7 +130,7 @@ class TestParser(object):
             assert context.arrays[22] == TwoDimArray(33, 11, [])
 
         def test_pa_empty(self, context, capsys):
-            parser.parse(make_token_iter([
+            parse(make_token_iter([
                 lit('CAR'),
                 ('POS_INT', '40'),
                 ('POS_INT', '22'),
@@ -145,7 +145,7 @@ class TestParser(object):
 
         def test_pa_uninitialized_array(self, context, capsys):
             with raises(UninitializedVariableError) as exc_info:
-                parser.parse(make_token_iter([
+                parse(make_token_iter([
                     lit('PA'),
                     ('POS_INT', '20'),
                 ]), context)
@@ -158,7 +158,7 @@ class TestParser(object):
             assert err == ''
 
         def test_sar(self, context):
-            parser.parse(make_token_iter([
+            parse(make_token_iter([
                 lit('CAR'),
                 ('POS_INT', '31'),
                 ('POS_INT', '2'),
@@ -179,7 +179,7 @@ class TestParser(object):
 
         def test_sar_incorrect_number_of_arguments(self, context):
             with raises(ArgumentError) as exc_info:
-                parser.parse(make_token_iter([
+                parse(make_token_iter([
                     lit('CAR'),
                     ('POS_INT', '31'),
                     ('POS_INT', '2'),
@@ -198,7 +198,7 @@ class TestParser(object):
                 exc_info, 'Takes exactly 6 arguments (5 given)')
 
         def test_car_sar_pa(self, context, capsys):
-            parser.parse(make_token_iter([
+            parse(make_token_iter([
                 lit('CAR'),
                 ('POS_INT', '31'),
                 ('POS_INT', '2'),
@@ -223,7 +223,7 @@ class TestParser(object):
 
         def test_sar_uninitialized(self, context):
             with raises(UninitializedVariableError) as exc_info:
-                parser.parse(make_token_iter([
+                parse(make_token_iter([
                     lit('SAR'),
                     ('POS_INT', '7'),
                     # We don't know how large an uninitialized array is, so
@@ -241,7 +241,7 @@ class TestParser(object):
     class TestInvalid(object):
         def test_sto_neg_index(self, context):
             with raises(ParseError) as exc_info:
-                parser.parse(make_token_iter([
+                parse(make_token_iter([
                     lit('STO'),
                     # STO should only take a POS_INT argument here.
                     ('NEG_INT', '-37'),
@@ -251,7 +251,7 @@ class TestParser(object):
 
         def test_end_of_one_line_program(self, context):
             with raises(ParseError) as exc_info:
-                parser.parse(make_token_iter([
+                parse(make_token_iter([
                     lit('STO'),
                     ('POS_INT', '37'),
                     # STO is missing a REAL argument
@@ -260,7 +260,7 @@ class TestParser(object):
 
         def test_missing_pr_arg(self, context):
             with raises(ParseError) as exc_info:
-                parser.parse(make_token_iter([
+                parse(make_token_iter([
                     lit('STO'),
                     ('POS_INT', '37'),
                     ('REAL', '42.3'),
@@ -273,7 +273,7 @@ class TestParser(object):
 
         def test_car_neg_dimension(self, context):
             with raises(ParseError) as exc_info:
-                parser.parse(make_token_iter([
+                parse(make_token_iter([
                     lit('CAR'),
                     ('POS_INT', '11'),
                     ('POS_INT', '12'),
@@ -283,7 +283,7 @@ class TestParser(object):
 
         def test_car_zero_rows(self, context):
             with raises(InvalidArrayDimensionsError) as exc_info:
-                parser.parse(make_token_iter([
+                parse(make_token_iter([
                     lit('CAR'),
                     ('POS_INT', '11'),
                     ('POS_INT', '0'),
@@ -294,7 +294,7 @@ class TestParser(object):
 
         def test_car_zero_cols(self, context):
             with raises(InvalidArrayDimensionsError) as exc_info:
-                parser.parse(make_token_iter([
+                parse(make_token_iter([
                     lit('CAR'),
                     ('POS_INT', '11'),
                     ('POS_INT', '7'),
