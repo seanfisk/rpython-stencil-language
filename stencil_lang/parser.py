@@ -1,11 +1,13 @@
+""":mod:`stencil_lang.parser` --- Parsing-related variables and classes
+"""
+
+# import copy
+
 from rply import ParserGenerator
 from rply.token import BaseBox
 
 from stencil_lang import metadata
 from stencil_lang.tokens import tokens
-""":mod:`stencil_lang.parser` --- Parsing-related variables and classes
-"""
-
 from stencil_lang.errors import (
     UninitializedVariableError,
     InvalidArrayDimensionsError,
@@ -13,8 +15,74 @@ from stencil_lang.errors import (
 )
 
 
-class ValueBox(BaseBox):
-    """Box that stores a single value."""
+# class ValueBox(BaseBox):
+#     """Box that stores a single value."""
+#     def __init__(self, value):
+#         """:param value: the value to store
+#         :type value: :class:`object`
+#         """
+#         self._value = value
+
+#     # Don't name this function `value'. RPython doesn't like it when
+#     # translating.
+#     def get_value(self):
+#         """Get the value from the box.
+
+#         :return: the value
+#         :rtype: :class:`object`
+#         """
+#         return self._value
+
+# Thought these boxes do the same thing, they all need to exist because they
+# hold different types. In addition, a separate __init__ and accessors with
+# _different names_ need to exist for each box.
+#
+# float and int seem to be OK to put in the same NumberBox. I'm not sure if
+# that's just a consequence of how I'm using them.
+#
+# The following things don't work:
+#
+# * Creating a no-op class which just inherits from a ValueBox that has
+#   __init__ and get_value.
+# * Creating classes using metaprogramming deep-copied from ValueBox.
+
+# def value_box_init(self, value):
+#     self._value = value
+
+# def value_box_get_value(self):
+#     """Get the value from the box.
+
+#     :return: the value
+#     :rtype: :class:`object`
+#     """
+#     return self._value
+
+# for box_name in ['number', 'list']:
+#     new_value_box_class = copy.deepcopy(ValueBox)
+#     # new_value_box_class = copy.deepcopy(BaseBox)
+#     setattr(new_value_box_class, 'get_%s' % box_name, value_box_get_value)
+#     globals()['%sBox' % box_name.capitalize()] = new_value_box_class
+
+# class IntBox(BaseBox):
+#     """Store an integer."""
+#     def __init__(self, value):
+#         """:param value: the value to store
+#         :type value: :class:`object`
+#         """
+#         self._value = value
+
+#     # Don't name this function `value'. RPython doesn't like it when
+#     # translating.
+#     def get_value(self):
+#         """Get the value from the box.
+
+#         :return: the value
+#         :rtype: :class:`object`
+#         """
+#         return self._value
+
+class NumberBox(BaseBox):
+    """Store a number: int of float."""
     def __init__(self, value):
         """:param value: the value to store
         :type value: :class:`object`
@@ -23,7 +91,7 @@ class ValueBox(BaseBox):
 
     # Don't name this function `value'. RPython doesn't like it when
     # translating.
-    def get_value(self):
+    def get_number(self):
         """Get the value from the box.
 
         :return: the value
@@ -31,23 +99,24 @@ class ValueBox(BaseBox):
         """
         return self._value
 
-# Thought IntBox and RealBox do the same thing, they both need to exist because
-# they hold different types.
 
-
-class IntBox(ValueBox):
-    """Store an integer."""
-    pass
-
-
-class RealBox(ValueBox):
-    """Store a real number."""
-    pass
-
-
-class NumberListBox(ValueBox):
+class ListBox(BaseBox):
     """Store a list of numbers."""
-    pass
+    def __init__(self, value):
+        """:param value: the value to store
+        :type value: :class:`object`
+        """
+        self._value = value
+
+    # Don't name this function `value'. RPython doesn't like it when
+    # translating.
+    def get_list(self):
+        """Get the value from the box.
+
+        :return: the value
+        :rtype: :class:`object`
+        """
+        return self._value
 
 
 class Context(object):
@@ -137,14 +206,14 @@ def stmt(state, p):
 
 @pg.production('sto : STO index number')
 def sto(state, p):
-    index = p[1].get_value()
-    number = p[2].get_value()
+    index = p[1].get_number()
+    number = p[2].get_number()
     state.registers[index] = number
 
 
 @pg.production('pr : PR index')
 def pr(state, p):
-    index = p[1].get_value()
+    index = p[1].get_number()
     try:
         print state.registers[index]
     except KeyError:
@@ -153,8 +222,8 @@ def pr(state, p):
 
 @pg.production('add : ADD index number')
 def add(state, p):
-    index = p[1].get_value()
-    number = p[2].get_value()
+    index = p[1].get_number()
+    number = p[2].get_number()
     try:
         state.registers[index] += number
     except KeyError:
@@ -163,9 +232,9 @@ def add(state, p):
 
 @pg.production('car : CAR index pos_int pos_int')
 def car(state, p):
-    index = p[1].get_value()
-    rows = p[2].get_value()
-    cols = p[3].get_value()
+    index = p[1].get_number()
+    rows = p[2].get_number()
+    cols = p[3].get_number()
     dimensions = (rows, cols)
     if rows <= 0 or cols <= 0:
         raise InvalidArrayDimensionsError(index, dimensions)
@@ -174,7 +243,7 @@ def car(state, p):
 
 @pg.production('pa : PA index')
 def pa(state, p):
-    index = p[1].get_value()
+    index = p[1].get_number()
     try:
         print state.arrays[index]
     except KeyError:
@@ -183,8 +252,8 @@ def pa(state, p):
 
 @pg.production('sar : SAR index number_list')
 def sar(state, p):
-    index = p[1].get_value()
-    number_list = p[2].get_value()
+    index = p[1].get_number()
+    number_list = p[2].get_list()
     try:
         two_dim_array = state.arrays[index]
     except KeyError:
@@ -197,21 +266,29 @@ def sar(state, p):
     two_dim_array.contents = number_list
 
 
-# number_list must come after number so that it can initially create for
+# number_list must come after number so that it can initially create a list for
 # insertion.
 @pg.production('number_list : number number_list')
 @pg.production('number_list : number')
 def number_list(state, p):
+    number = p[0].get_number()
     if len(p) == 2:
         # number_list : number number_list
-        number = p[0].get_value()
         number_list_box = p[1]
-        number_list_box.get_value().insert(0, number)
-        return number_list_box
+        # new_number_list_box = ListBox([number])
+        # new_number_list_box.get_value().extend(number_list_box.get_value())
+        # number_list_box.get_value().insert(0, number)
 
-    # number_list : number
-    number = p[0].get_value()
-    return NumberListBox([number])
+        # Make a shallow copy
+        # new_number_list = number_list_box.get_list()[:]
+        # new_number_list.insert(0, number)
+        # new_number_list_box = ListBox(new_number_list)
+        # TODO: Might have a problem with this mutating the list in the future.
+        number_list_box.get_list().insert(0, number)
+    else:
+        # number_list : number
+        number_list_box = ListBox([number])  # NOQA
+    return number_list_box
 
 
 @pg.production('number : int')
@@ -222,7 +299,7 @@ def number(state, p):
 
 @pg.production('real : REAL')
 def real(state, p):
-    return RealBox(float(p[0].getstr()))
+    return NumberBox(float(p[0].getstr()))  # NOQA
 
 
 @pg.production('int : POS_INT')
@@ -230,7 +307,7 @@ def real(state, p):
 @pg.production('index : POS_INT')
 @pg.production('pos_int : POS_INT')
 def int_(state, p):
-    return IntBox(int(p[0].getstr()))
+    return NumberBox(int(p[0].getstr()))  # NOQA
 
 
 @pg.error
