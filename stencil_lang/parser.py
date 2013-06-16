@@ -188,7 +188,9 @@ def car(state, p):
 def pa(state, p):
     index = p[1].get_number()
     try:
-        print state.arrays[index]
+        # RPython does not honor most magic methods. Hence, just `print' will
+        # work in tests but not when translated.
+        print state.arrays[index].__str__()
     except KeyError:
         raise UninitializedVariableError('array', index)
 
