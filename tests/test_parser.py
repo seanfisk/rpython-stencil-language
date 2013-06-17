@@ -1,3 +1,4 @@
+import sys
 from pprint import isreadable
 
 from pytest import fixture, raises
@@ -73,6 +74,28 @@ class TestParser(object):
                     # STO is missing a REAL argument
                 ]), context)
             assert_exc_info_msg(exc_info, "Unexpected `$end'")
+
+        def test_large_integer(self, context):
+            # This doesn't test RPython's capabilities, since it's not running
+            # translated.
+            int_str = '9%d' % sys.maxint
+            parse(make_token_iter([
+                lit('STO'),
+                ('POS_INT', '31'),
+                ('POS_INT', int_str),
+            ]), context)
+            assert context.registers[31] == int(int_str)
+
+        def test_small_integer(self, context):
+            # This doesn't test RPython's capabilities, since it's not running
+            # translated.
+            int_str = '-9%d' % sys.maxint
+            parse(make_token_iter([
+                lit('STO'),
+                ('POS_INT', '31'),
+                ('POS_INT', int_str),
+            ]), context)
+            assert context.registers[31] == int(int_str)
 
     class TestPr(object):
         def test_sto_pr(self, context, capsys):
