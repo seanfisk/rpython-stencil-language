@@ -33,3 +33,7 @@ pip-log.txt
 
 ## paver generated files
 /paver-minilib.zip
+
+# Translated interpreters
+stencil
+stencil-jit

@@ -36,8 +36,6 @@ except ImportError:
 sys.path.append('.')
 from setup import setup_dict
 
-from stencil_lang import metadata
-
 ## Constants
 CODE_DIRECTORY = 'stencil_lang'
 TESTS_DIRECTORY = 'tests'
@@ -191,9 +189,9 @@ def translate(options):
         env.update(os.environ)
         cmd_flags = ['--make-jobs', str(cpus)]
         if 'jit' in options.translate:
-            cmd_flags += ['--output', metadata.package + '-jit', '--opt=jit']
+            cmd_flags += ['--output', 'stencil-jit', '--opt=jit']
         else:
-            cmd_flags += ['--output', metadata.package]
+            cmd_flags += ['--output', 'stencil']
         cmd_line = ([executable] + cmd_flags +
                     [os.path.join(CODE_DIRECTORY, 'main.py')])
         print_success_message('Translating: ' + ' '.join(cmd_line))
