@@ -1,8 +1,15 @@
 #!/usr/bin/env python
 """:mod:`stencil_lang.main` -- Program entry point
 """
-import os
+
 import sys
+
+try:
+    # PyPy >= 2.0-beta2
+    from rpython.rlib.streamio import open_file_as_stream
+except ImportError:
+    # PyPy <= 2.0-beta1
+    from pypy.rlib.streamio import open_file_as_stream
 
 from stencil_lang import metadata
 from stencil_lang.interpreter import run
@@ -56,18 +63,11 @@ URL: <%s>
         return 1
 
     input_filename = argv[1]
-
-    input_fp = os.open(input_filename, os.O_RDONLY, 0777)
-
-    source_code_list = []
-    while True:
-        read = os.read(input_fp, 4096)
-        if len(read) == 0:
-            break
-        source_code_list.append(read)
-    os.close(input_fp)
-
-    source_code = ''.join(source_code_list)
+    input_stream = open_file_as_stream(input_filename)
+    try:
+        source_code = input_stream.readall()
+    finally:
+        input_stream.close()
     default_context = Context()
     try:
         run(source_code, default_context)
