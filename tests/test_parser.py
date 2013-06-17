@@ -197,6 +197,48 @@ class TestParser(object):
             assert_exc_info_msg(
                 exc_info, 'Takes exactly 6 arguments (5 given)')
 
+        def test_pa_one_row_array(self, context, capsys):
+            parse(make_token_iter([
+                lit('CAR'),
+                ('POS_INT', '22'),
+                ('POS_INT', '1'),
+                ('POS_INT', '4'),
+                lit('SAR'),
+                ('POS_INT', '22'),
+                ('REAL', '23.2'),
+                ('REAL', '-42.11'),
+                ('REAL', '54.001'),
+                ('REAL', '7.11'),
+                lit('PA'),
+                ('POS_INT', '22'),
+            ]), context)
+            out, err = capsys.readouterr()
+            assert out == '[[23.2 -42.11 54.001 7.11]]\n'
+            assert err == ''
+
+        def test_pa_one_col_array(self, context, capsys):
+            parse(make_token_iter([
+                lit('CAR'),
+                ('POS_INT', '22'),
+                ('POS_INT', '4'),
+                ('POS_INT', '1'),
+                lit('SAR'),
+                ('POS_INT', '22'),
+                ('REAL', '23.2'),
+                ('REAL', '-42.11'),
+                ('REAL', '54.001'),
+                ('REAL', '7.11'),
+                lit('PA'),
+                ('POS_INT', '22'),
+            ]), context)
+            out, err = capsys.readouterr()
+            assert out == '''[[23.2]
+[-42.11]
+[54.001]
+[7.11]]
+'''
+            assert err == ''
+
         def test_car_sar_pa(self, context, capsys):
             parse(make_token_iter([
                 lit('CAR'),
