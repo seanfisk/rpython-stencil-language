@@ -90,25 +90,24 @@ class Context(object):
         """Array bank for the interpreter."""
 
 
-# Can't start a class name with a number.
-class TwoDimArray(object):
-    """Array object for the interpreter."""
+class Matrix(object):
+    """Matrix object for the interpreter."""
     def __init__(self, rows, cols, init_contents):
-        """:param rows: number of rows in the array
+        """:param rows: number of rows
         :type rows: :class:`int`
-        :param cols: number of columns in the array
+        :param cols: number of columns
         :type cols: :class:`int`
-        :param init_contents: initial contents of the array
+        :param init_contents: initial contents
         :type init_contents: :class:`list`
         """
         # I'd prefer to have a dimensions tuple, but RPython loses track of
         # whether they are positive or negative when inserted into a tuple.
         self.rows = rows
-        """Number of rows in the array."""
+        """Number of rows in the matrix."""
         self.cols = cols
-        """Number of columns in the array."""
+        """Number of columns in the matrix."""
         self.contents = init_contents
-        """Contents of the array, stored as a flat list."""
+        """Contents of the matrix, stored as a flat list."""
 
     def __eq__(self, other):
         # RPython does not honor this method, so it is mostly for testing.
@@ -197,7 +196,7 @@ def car(state, p):
     cols = p[3].get_int()
     if rows <= 0 or cols <= 0:
         raise InvalidArrayDimensionsError(index, (rows, cols))
-    state.arrays[index] = TwoDimArray(rows, cols, [])
+    state.arrays[index] = Matrix(rows, cols, [])
 
 
 @pg.production('pa : PA index')

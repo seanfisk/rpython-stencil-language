@@ -4,7 +4,7 @@ from pprint import isreadable
 from pytest import fixture, raises
 from rply import Token
 
-from stencil_lang.parser import parse, Context, ParseError, TwoDimArray
+from stencil_lang.parser import parse, Context, ParseError, Matrix
 from stencil_lang.errors import (
     UninitializedVariableError,
     InvalidArrayDimensionsError,
@@ -185,7 +185,7 @@ class TestParser(object):
                 ('POS_INT', '33'),
                 ('POS_INT', '11'),
             ]), context)
-            assert context.arrays[22] == TwoDimArray(33, 11, [])
+            assert context.arrays[22] == Matrix(33, 11, [])
 
         def test_negative_array_index(self, context):
             with raises(ParseError) as exc_info:
@@ -240,7 +240,7 @@ class TestParser(object):
                 ('POS_INT', '40'),
             ]), context)
             out, err = capsys.readouterr()
-            # Should call TwoDimArray.__str__ and add a newline.
+            # Should call __str__ and add a newline.
             assert out == 'Unpopulated array of dimensions (22, 78)\n'
             assert err == ''
 
@@ -341,7 +341,7 @@ class TestParser(object):
                 ('REAL', '34.8'),
                 ('REAL', '-88.2'),
             ]), context)
-            assert context.arrays[31] == TwoDimArray(2, 3, [
+            assert context.arrays[31] == Matrix(2, 3, [
                 -13.4, 9876, 45.234, -42, 34.8, -88.2
             ])
 
@@ -386,39 +386,39 @@ class TestParser(object):
 class TestTwoDimArray(object):
     class TestEquality(object):
         def test_empty(self):
-            assert TwoDimArray(4, 5, []) == TwoDimArray(4, 5, [])
+            assert Matrix(4, 5, []) == Matrix(4, 5, [])
 
         def test_full(self):
-            assert (TwoDimArray(2, 3, range(6)) ==
-                    TwoDimArray(2, 3, range(6)))
+            assert (Matrix(2, 3, range(6)) ==
+                    Matrix(2, 3, range(6)))
 
         def test_readable(self):
-            assert isreadable(TwoDimArray(2, 4, range(11)))
+            assert isreadable(Matrix(2, 4, range(11)))
 
     class TestRepr(object):
         def test_empty(self):
-            assert (repr(TwoDimArray(20, 30, [])) ==
-                    'TwoDimArray(20, 30, [])')
+            assert (repr(Matrix(20, 30, [])) ==
+                    'Matrix(20, 30, [])')
 
         def test_full(self):
             assert (
-                repr(TwoDimArray(2, 3, [45, 26, -32.5, 11.1, 0.5, -0.2])) ==
-                'TwoDimArray(2, 3, [45, 26, -32.5, 11.1, 0.5, -0.2])')
+                repr(Matrix(2, 3, [45, 26, -32.5, 11.1, 0.5, -0.2])) ==
+                'Matrix(2, 3, [45, 26, -32.5, 11.1, 0.5, -0.2])')
 
     class TestStr(object):
         def test_empty(self):
-            assert (str(TwoDimArray(4, 5, [])) ==
+            assert (str(Matrix(4, 5, [])) ==
                     'Unpopulated array of dimensions (4, 5)')
 
         def test_full_small(self):
             # Typical assert order reversed for a nicer multiline diff.
             assert '''[[0 1 2]
-[3 4 5]]''' == str(TwoDimArray(2, 3, range(6)))
+[3 4 5]]''' == str(Matrix(2, 3, range(6)))
 
         def test_full_big(self):
             # Typical assert order reversed for a nicer multiline diff.
             assert '''[[45 26]
 [-32.5 11]
 [-42.5 73.2000001]
-[11.1 -0.2]]''' == str(TwoDimArray(4, 2, [
+[11.1 -0.2]]''' == str(Matrix(4, 2, [
                 45, 26, -32.5, 11, -42.5, 73.2000001, 11.1, -0.2]))
