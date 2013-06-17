@@ -28,8 +28,8 @@ def context():
 
 
 class TestParser(object):
-    class TestValid(object):
-        def test_sto_real(self, context):
+    class TestSto(object):
+        def test_real(self, context):
             parse(make_token_iter([
                 lit('STO'),
                 ('POS_INT', '10'),
@@ -39,7 +39,7 @@ class TestParser(object):
             # test.
             assert context.registers[10] == -768.245
 
-        def test_sto_pos_int(self, context):
+        def test_pos_int(self, context):
             parse(make_token_iter([
                 lit('STO'),
                 ('POS_INT', '10'),
@@ -47,7 +47,7 @@ class TestParser(object):
             ]), context)
             assert context.registers[10] == 32
 
-        def test_sto_neg_int(self, context):
+        def test_neg_int(self, context):
             parse(make_token_iter([
                 lit('STO'),
                 ('POS_INT', '10'),
@@ -55,6 +55,26 @@ class TestParser(object):
             ]), context)
             assert context.registers[10] == -88
 
+        def test_sto_neg_index(self, context):
+            with raises(ParseError) as exc_info:
+                parse(make_token_iter([
+                    lit('STO'),
+                    # STO should only take a POS_INT argument here.
+                    ('NEG_INT', '-37'),
+                    ('REAL', '42.4'),
+                ]), context)
+            assert_exc_info_msg(exc_info, "Unexpected `NEG_INT'")
+
+        def test_end_of_one_line_program(self, context):
+            with raises(ParseError) as exc_info:
+                parse(make_token_iter([
+                    lit('STO'),
+                    ('POS_INT', '37'),
+                    # STO is missing a REAL argument
+                ]), context)
+            assert_exc_info_msg(exc_info, "Unexpected `$end'")
+
+    class TestPr(object):
         def test_sto_pr(self, context, capsys):
             parse(make_token_iter([
                 lit('STO'),
@@ -67,7 +87,7 @@ class TestParser(object):
             assert out == '-452.11\n'
             assert err == ''
 
-        def test_pr_uninitialized(self, context, capsys):
+        def test_uninitialized(self, context, capsys):
             with raises(UninitializedVariableError) as exc_info:
                 parse(make_token_iter([
                     lit('PR'),
@@ -80,6 +100,20 @@ class TestParser(object):
             assert out == ''
             assert err == ''
 
+        def test_missing_arg(self, context):
+            with raises(ParseError) as exc_info:
+                parse(make_token_iter([
+                    lit('STO'),
+                    ('POS_INT', '37'),
+                    ('REAL', '42.3'),
+                    lit('PR'),
+                    # PR is missing an POS_INT argument
+                    lit('PR'),
+                    ('POS_INT', '37'),
+                ]), context)
+            assert_exc_info_msg(exc_info, "Unexpected `PR'")
+
+    class TestAdd(object):
         def test_sto_add(self, context):
             parse(make_token_iter([
                 lit('STO'),
@@ -109,7 +143,7 @@ class TestParser(object):
             assert out == '45.5\n99.9\n'
             assert err == ''
 
-        def test_add_uninitialized(self, context):
+        def test_uninitialized(self, context):
             with raises(UninitializedVariableError) as exc_info:
                 parse(make_token_iter([
                     lit('ADD'),
@@ -120,7 +154,8 @@ class TestParser(object):
                 exc_info,
                 'Register 7 is not initialized. Please STO first.')
 
-        def test_car(self, context):
+    class TestCar(object):
+        def test_internals(self, context):
             parse(make_token_iter([
                 lit('CAR'),
                 ('POS_INT', '22'),
@@ -129,7 +164,40 @@ class TestParser(object):
             ]), context)
             assert context.arrays[22] == TwoDimArray(33, 11, [])
 
-        def test_pa_empty(self, context, capsys):
+        def test_neg_dimension(self, context):
+            with raises(ParseError) as exc_info:
+                parse(make_token_iter([
+                    lit('CAR'),
+                    ('POS_INT', '11'),
+                    ('POS_INT', '12'),
+                    ('NEG_INT', '-13'),
+                ]), context)
+            assert_exc_info_msg(exc_info, "Unexpected `NEG_INT'")
+
+        def test_zero_rows(self, context):
+            with raises(InvalidArrayDimensionsError) as exc_info:
+                parse(make_token_iter([
+                    lit('CAR'),
+                    ('POS_INT', '11'),
+                    ('POS_INT', '0'),
+                    ('POS_INT', '32'),
+                ]), context)
+            assert_exc_info_msg(
+                exc_info, "Invalid positive dimensions for array 11: (0, 32)")
+
+        def test_zero_cols(self, context):
+            with raises(InvalidArrayDimensionsError) as exc_info:
+                parse(make_token_iter([
+                    lit('CAR'),
+                    ('POS_INT', '11'),
+                    ('POS_INT', '7'),
+                    ('POS_INT', '0'),
+                ]), context)
+            assert_exc_info_msg(
+                exc_info, "Invalid positive dimensions for array 11: (7, 0)")
+
+    class TestPa(object):
+        def test_empty(self, context, capsys):
             parse(make_token_iter([
                 lit('CAR'),
                 ('POS_INT', '40'),
@@ -143,7 +211,7 @@ class TestParser(object):
             assert out == 'Unpopulated array of dimensions (22, 78)\n'
             assert err == ''
 
-        def test_pa_uninitialized_array(self, context, capsys):
+        def test_uninitialized(self, context, capsys):
             with raises(UninitializedVariableError) as exc_info:
                 parse(make_token_iter([
                     lit('PA'),
@@ -156,46 +224,6 @@ class TestParser(object):
             out, err = capsys.readouterr()
             assert out == ''
             assert err == ''
-
-        def test_sar(self, context):
-            parse(make_token_iter([
-                lit('CAR'),
-                ('POS_INT', '31'),
-                ('POS_INT', '2'),
-                ('POS_INT', '3'),
-                lit('SAR'),
-                ('POS_INT', '31'),
-                # Contents
-                ('REAL', '-13.4'),
-                ('POS_INT', '9876'),
-                ('REAL', '45.234'),
-                ('POS_INT', '-42'),
-                ('REAL', '34.8'),
-                ('REAL', '-88.2'),
-            ]), context)
-            assert context.arrays[31] == TwoDimArray(2, 3, [
-                -13.4, 9876, 45.234, -42, 34.8, -88.2
-            ])
-
-        def test_sar_incorrect_number_of_arguments(self, context):
-            with raises(ArgumentError) as exc_info:
-                parse(make_token_iter([
-                    lit('CAR'),
-                    ('POS_INT', '31'),
-                    ('POS_INT', '2'),
-                    ('POS_INT', '3'),
-                    lit('SAR'),
-                    ('POS_INT', '31'),
-                    # Contents
-                    ('REAL', '-13.4'),
-                    ('POS_INT', '9876'),
-                    ('REAL', '45.234'),
-                    ('POS_INT', '-42'),
-                    ('REAL', '34.8'),
-                    # Missing one
-                ]), context)
-            assert_exc_info_msg(
-                exc_info, 'Takes exactly 6 arguments (5 given)')
 
         def test_pa_one_row_array(self, context, capsys):
             parse(make_token_iter([
@@ -263,7 +291,48 @@ class TestParser(object):
 '''
             assert err == ''
 
-        def test_sar_uninitialized(self, context):
+    class TestSar(object):
+        def test_car_sar(self, context):
+            parse(make_token_iter([
+                lit('CAR'),
+                ('POS_INT', '31'),
+                ('POS_INT', '2'),
+                ('POS_INT', '3'),
+                lit('SAR'),
+                ('POS_INT', '31'),
+                # Contents
+                ('REAL', '-13.4'),
+                ('POS_INT', '9876'),
+                ('REAL', '45.234'),
+                ('POS_INT', '-42'),
+                ('REAL', '34.8'),
+                ('REAL', '-88.2'),
+            ]), context)
+            assert context.arrays[31] == TwoDimArray(2, 3, [
+                -13.4, 9876, 45.234, -42, 34.8, -88.2
+            ])
+
+        def test_incorrect_number_of_arguments(self, context):
+            with raises(ArgumentError) as exc_info:
+                parse(make_token_iter([
+                    lit('CAR'),
+                    ('POS_INT', '31'),
+                    ('POS_INT', '2'),
+                    ('POS_INT', '3'),
+                    lit('SAR'),
+                    ('POS_INT', '31'),
+                    # Contents
+                    ('REAL', '-13.4'),
+                    ('POS_INT', '9876'),
+                    ('REAL', '45.234'),
+                    ('POS_INT', '-42'),
+                    ('REAL', '34.8'),
+                    # Missing one
+                ]), context)
+            assert_exc_info_msg(
+                exc_info, 'Takes exactly 6 arguments (5 given)')
+
+        def test_uninitialized(self, context):
             with raises(UninitializedVariableError) as exc_info:
                 parse(make_token_iter([
                     lit('SAR'),
@@ -279,71 +348,6 @@ class TestParser(object):
             assert_exc_info_msg(
                 exc_info,
                 'Array 7 is not initialized. Please CAR first.')
-
-    class TestInvalid(object):
-        def test_sto_neg_index(self, context):
-            with raises(ParseError) as exc_info:
-                parse(make_token_iter([
-                    lit('STO'),
-                    # STO should only take a POS_INT argument here.
-                    ('NEG_INT', '-37'),
-                    ('REAL', '42.4'),
-                ]), context)
-            assert_exc_info_msg(exc_info, "Unexpected `NEG_INT'")
-
-        def test_end_of_one_line_program(self, context):
-            with raises(ParseError) as exc_info:
-                parse(make_token_iter([
-                    lit('STO'),
-                    ('POS_INT', '37'),
-                    # STO is missing a REAL argument
-                ]), context)
-            assert_exc_info_msg(exc_info, "Unexpected `$end'")
-
-        def test_missing_pr_arg(self, context):
-            with raises(ParseError) as exc_info:
-                parse(make_token_iter([
-                    lit('STO'),
-                    ('POS_INT', '37'),
-                    ('REAL', '42.3'),
-                    lit('PR'),
-                    # PR is missing an POS_INT argument
-                    lit('PR'),
-                    ('POS_INT', '37'),
-                ]), context)
-            assert_exc_info_msg(exc_info, "Unexpected `PR'")
-
-        def test_car_neg_dimension(self, context):
-            with raises(ParseError) as exc_info:
-                parse(make_token_iter([
-                    lit('CAR'),
-                    ('POS_INT', '11'),
-                    ('POS_INT', '12'),
-                    ('NEG_INT', '-13'),
-                ]), context)
-            assert_exc_info_msg(exc_info, "Unexpected `NEG_INT'")
-
-        def test_car_zero_rows(self, context):
-            with raises(InvalidArrayDimensionsError) as exc_info:
-                parse(make_token_iter([
-                    lit('CAR'),
-                    ('POS_INT', '11'),
-                    ('POS_INT', '0'),
-                    ('POS_INT', '32'),
-                ]), context)
-            assert_exc_info_msg(
-                exc_info, "Invalid positive dimensions for array 11: (0, 32)")
-
-        def test_car_zero_cols(self, context):
-            with raises(InvalidArrayDimensionsError) as exc_info:
-                parse(make_token_iter([
-                    lit('CAR'),
-                    ('POS_INT', '11'),
-                    ('POS_INT', '7'),
-                    ('POS_INT', '0'),
-                ]), context)
-            assert_exc_info_msg(
-                exc_info, "Invalid positive dimensions for array 11: (7, 0)")
 
 
 class TestTwoDimArray(object):
