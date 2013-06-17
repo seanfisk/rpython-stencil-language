@@ -13,12 +13,7 @@ from stencil_lang.errors import (
     ParseError,
 )
 
-from tests.helpers import lit
-
-
-def assert_exc_info_msg(exc_info, expected_msg):
-    # LHS and RHS intentionally placed so diffs seem correct.
-    assert expected_msg == str(exc_info.value)
+from tests.helpers import lit, assert_exc_info_msg
 
 
 def make_token_iter(token_tuple_list):

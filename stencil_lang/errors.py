@@ -76,6 +76,23 @@ class ParseError(StencilLanguageError):
         return "Unexpected `%s'" % self._token_name
 
 
+class InconsistentMatrixDimensions(StencilLanguageError):
+    """Raised when matrix dimensions are no longer consistent."""
+    def __init__(self, first_row_cols, current_cols):
+        """:param first_row_cols: Number of columns in the first row
+        :type first_row_cols: :class:`int`
+        :param current_cols: Number of columns in the current row
+        :type current_cols: :class:`int`
+        """
+        self._first_row_cols = first_row_cols
+        self._current_cols = current_cols
+
+    def __str__(self):
+        return ('Inconsistent columns in current row (%d) '
+                'from those in the first row (%d)') % (
+                    self._current_cols, self._first_row_cols)
+
+
 # Get around limitations in RPython: type(error).__name__ does not work. See
 # stencil_lang/main.py for more information.
 for subclass in StencilLanguageError.__subclasses__():

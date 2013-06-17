@@ -104,28 +104,22 @@ def sar(state, p):
     two_dim_array.contents = number_list
 
 
-# number_list must come after number so that it can initially create a list for
-# insertion.
-@pg.production('number_list : number number_list')
+# number_list must come first to parse the first number s first.
+@pg.production('number_list : number_list number')
 @pg.production('number_list : number')
 def number_list(state, p):
-    number = p[0].get_int() if isinstance(p[0], IntBox) else p[0].get_float()
     if len(p) == 2:
-        # number_list : number number_list
-        number_list_box = p[1]
-        # new_number_list_box = ListBox([number])
-        # new_number_list_box.get_value().extend(number_list_box.get_value())
-        # number_list_box.get_value().insert(0, number)
-
-        # Make a shallow copy
-        # new_number_list = number_list_box.get_list()[:]
-        # new_number_list.insert(0, number)
-        # new_number_list_box = ListBox(new_number_list)
+        # number_list : number_list number
+        number_list_box = p[0]
+        number = (p[1].get_int() if isinstance(p[1], IntBox)
+                  else p[1].get_float())
         # TODO: Might have a problem with this mutating the list in the future.
-        number_list_box.get_list().insert(0, number)
+        number_list_box.get_list().append(number)
     else:
         # number_list : number
-        number_list_box = ListBox([number])  # NOQA
+        number = (p[0].get_int() if isinstance(p[0], IntBox)
+                  else p[0].get_float())
+        number_list_box = ListBox([number])
     return number_list_box
 
 
@@ -166,5 +160,7 @@ def parse(text, state):
     :type text: :class:`str`
     :param state: state to pass to the parser
     :type state: :class:`object`
+    :return: the final value parsed
+    :rtype: :class:`rply.token.BaseBox`
     """
-    _parser.parse(text, state)
+    return _parser.parse(text, state)

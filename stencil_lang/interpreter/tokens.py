@@ -1,4 +1,4 @@
-""":mod:`stencil_lang.tokens` -- Tokens for lexing and parsing
+""":mod:`stencil_lang.interpreter.tokens` -- Tokens for lexing and parsing
 """
 
 from stencil_lang.tokens import numbers

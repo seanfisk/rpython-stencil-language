@@ -20,7 +20,14 @@ from rply.token import BaseBox
 #   assigning __init__ and get_* methods to them.
 
 
-class IntBox(BaseBox):
+class ValueBox(BaseBox):
+    """Box created solely to add a repr."""
+    def __repr__(self):
+        # RPython does not honor this method, so it is solely for testing.
+        return '%s(%s)' % (type(self).__name__, self._value)
+
+
+class IntBox(ValueBox):
     """Store an integer."""
     def __init__(self, value):
         """:param value: the number to store
@@ -37,7 +44,7 @@ class IntBox(BaseBox):
         return self._value
 
 
-class FloatBox(BaseBox):
+class FloatBox(ValueBox):
     """Store a floating-point real number."""
     def __init__(self, value):
         """:param value: the number to store
@@ -54,7 +61,7 @@ class FloatBox(BaseBox):
         return self._value
 
 
-class ListBox(BaseBox):
+class ListBox(ValueBox):
     """Store a list of numbers."""
     def __init__(self, value):
         """:param value: the value to store

@@ -1,9 +1,9 @@
-""":mod:`stencil_lang.interpreter.lexer` --- Scanning-related variables
+""":mod:`stencil_lang.matrix.lexer` -- Matrix scanner
 """
+
 from rply import LexerGenerator
 
-from stencil_lang.interpreter.tokens import tokens
-from stencil_lang.tokens import ignores
+from stencil_lang.matrix.tokens import tokens, ignores
 
 lg = LexerGenerator()
 

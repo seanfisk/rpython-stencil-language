@@ -11,6 +11,5 @@ numbers = {
 
 ignores = [
     r'\s+',
-    r'\n+',
 ]
 """Patterns to ignore."""
