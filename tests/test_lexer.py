@@ -2,7 +2,7 @@ from pytest import raises
 from rply import Token
 from rply.errors import LexingError
 
-from stencil_lang.lexer import lex
+from stencil_lang.interpreter.lexer import lex
 
 from tests.helpers import lit
 

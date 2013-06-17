@@ -1,8 +1,8 @@
-""":mod:`stencil_lang.lexer` --- Scanning-related variables
+""":mod:`stencil_lang.interpreter.lexer` --- Scanning-related variables
 """
-
 from rply import LexerGenerator
-from stencil_lang.tokens import tokens, ignores
+from stencil_lang.interpreter.tokens import tokens
+from stencil_lang.tokens import ignores
 
 lg = LexerGenerator()
 

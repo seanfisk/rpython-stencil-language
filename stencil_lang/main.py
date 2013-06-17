@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 """:mod:`stencil_lang.main` -- Program entry point
 """
-
 import os
 import sys
 
 from stencil_lang import metadata
-from stencil_lang.lexer import lex
-from stencil_lang.parser import parse, Context
+from stencil_lang.interpreter import run
+from stencil_lang.structures import Context
 from stencil_lang.errors import StencilLanguageError
 
 
@@ -69,10 +68,9 @@ URL: <%s>
     os.close(input_fp)
 
     source_code = ''.join(source_code_list)
-    stream = lex(source_code)
     default_context = Context()
     try:
-        parse(stream, default_context)
+        run(source_code, default_context)
     except StencilLanguageError as error:
         # The purpose of this except block is two-fold:
         #

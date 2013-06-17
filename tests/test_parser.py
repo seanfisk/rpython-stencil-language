@@ -4,11 +4,13 @@ from pprint import isreadable
 from pytest import fixture, raises
 from rply import Token
 
-from stencil_lang.parser import parse, Context, ParseError, Matrix
+from stencil_lang.interpreter.parser import parse
+from stencil_lang.structures import Context, Matrix
 from stencil_lang.errors import (
     UninitializedVariableError,
     InvalidArrayDimensionsError,
     ArgumentError,
+    ParseError,
 )
 
 from tests.helpers import lit
