@@ -164,6 +164,16 @@ class TestParser(object):
             ]), context)
             assert context.arrays[22] == TwoDimArray(33, 11, [])
 
+        def test_negative_array_index(self, context):
+            with raises(ParseError) as exc_info:
+                parse(make_token_iter([
+                    lit('CAR'),
+                    ('NEG_INT', '-22'),
+                    ('POS_INT', '20'),
+                    ('POS_INT', '20'),
+                ]), context)
+            assert_exc_info_msg(exc_info, "Unexpected `NEG_INT'")
+
         def test_neg_dimension(self, context):
             with raises(ParseError) as exc_info:
                 parse(make_token_iter([
