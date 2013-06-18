@@ -2,6 +2,7 @@
 """
 
 from stencil_lang.structures import Matrix
+from stencil_lang.errors import InvalidStencilDimensionsError
 
 
 def _make_halo(matrix, num_row_layers, num_col_layers):
@@ -35,6 +36,10 @@ def apply_stencil(stencil, matrix):
     :return: the generated matrix
     :rtype: :class:`stencil_lang.structures.Matrix`
     """
+    stencil_dims = (stencil.rows, stencil.cols)
+    for dim in stencil_dims:
+        if dim % 2 == 0:
+            raise InvalidStencilDimensionsError(stencil_dims)
     num_row_layers = (stencil.rows - 1) / 2
     num_col_layers = (stencil.cols - 1) / 2
     halo = _make_halo(matrix, num_row_layers, num_col_layers)

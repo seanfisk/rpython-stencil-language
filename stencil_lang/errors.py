@@ -93,6 +93,19 @@ class InconsistentMatrixDimensions(StencilLanguageError):
                     self._current_cols, self._first_row_cols)
 
 
+class InvalidStencilDimensionsError(StencilLanguageError):
+    """Raised when an array is attempted to be used as a stencil and its
+    dimensions are not correct for that usage."""
+    def __init__(self, dimensions):
+        """:param dimensions: new dimensions of array
+        :type dimensions: :class:`tuple` of (:class:`int`, :class:`int`)
+        """
+        self._dimensions = dimensions
+
+    def __str__(self):
+        return 'Invalid odd dimensions for stencil: %s' % (self._dimensions, )
+
+
 # Get around limitations in RPython: type(error).__name__ does not work. See
 # stencil_lang/main.py for more information.
 #
