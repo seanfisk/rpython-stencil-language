@@ -61,12 +61,12 @@ class TestMatrix(object):
         def test_full_small(self):
             # Typical assert order reversed for a nicer multiline diff.
             assert '''[[0 1 2]
-[3 4 5]]''' == str(Matrix(2, 3, range(6)))
+ [3 4 5]]''' == str(Matrix(2, 3, range(6)))
 
         def test_full_big(self):
             # Typical assert order reversed for a nicer multiline diff.
             assert '''[[45 26]
-[-32.5 11]
-[-42.5 73.2000001]
-[11.1 -0.2]]''' == str(Matrix(4, 2, [
+ [-32.5 11]
+ [-42.5 73.2000001]
+ [11.1 -0.2]]''' == str(Matrix(4, 2, [
                 45, 26, -32.5, 11, -42.5, 73.2000001, 11.1, -0.2]))

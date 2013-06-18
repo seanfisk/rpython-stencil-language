@@ -151,4 +151,4 @@ class Matrix(object):
             nums_str = ' '.join(nums_str_list)
             row_strs.append('[%s]' % nums_str)
 
-        return '[%s]' % '\n'.join(row_strs)
+        return '[%s]' % '\n '.join(row_strs)

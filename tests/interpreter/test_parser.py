@@ -289,11 +289,11 @@ class TestParser(object):
                 ('POS_INT', '22'),
             ]), context)
             out, err = capsys.readouterr()
-            assert out == '''[[23.2]
-[-42.11]
-[54.001]
-[7.11]]
-'''
+            assert '''[[23.2]
+ [-42.11]
+ [54.001]
+ [7.11]]
+''' == out
             assert err == ''
 
         def test_car_sar_pa(self, context, capsys):
@@ -315,9 +315,9 @@ class TestParser(object):
                 ('POS_INT', '31'),
             ]), context)
             out, err = capsys.readouterr()
-            assert out == '''[[-13.4 9876 45.234]
-[-42 34.8 -88.2]]
-'''
+            assert '''[[-13.4 9876 45.234]
+ [-42 34.8 -88.2]]
+''' == out
             assert err == ''
 
     class TestSar(object):
