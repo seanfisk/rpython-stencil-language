@@ -1,5 +1,3 @@
-import os.path
-
 from pytest import raises, fixture
 
 from stencil_lang.matrix import from_string, from_file
@@ -40,5 +38,5 @@ def matrix_name(request):
 
 class TestFromFile(object):
     def test_simple(self, matrix_name):
-        assert (from_file(fixture_path(os.path.join('before', matrix_name))) ==
+        assert (from_file(fixture_path(matrix_name)) ==
                 Matrix(2, 2, [11.7, 52, -34, -12.2]))
