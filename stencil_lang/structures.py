@@ -111,13 +111,33 @@ class Matrix(object):
         return (self.rows == other.rows and self.cols == other.cols and
                 self.contents == other.contents)
 
+    def __getitem__(self, requested_indices):
+        # RPython does not honor this method, so please call it directly.
+        dimensions = (self.rows, self.cols)
+        flat_index = 0
+        significance = 1
+        for i in xrange(len(dimensions) - 1, -1, -1):
+            dimension = dimensions[i]
+            requested_index = requested_indices[i]
+
+            real_index = requested_index
+            while real_index < 0:
+                real_index += dimension
+            while real_index >= dimension:
+                real_index -= dimension
+
+            flat_index += real_index * significance
+            significance *= dimensions[i]
+
+        return self.contents[flat_index]
+
     def __repr__(self):
         # RPython does not honor this method, so it is mostly for testing.
         return '%s(%d, %d, %s)' % (
             type(self).__name__, self.rows, self.cols, self.contents)
 
     def __str__(self):
-        # RPython does not honor this method, but we call it directly.
+        # RPython does not honor this method, so please call it directly.
         if self.contents == []:
             return 'Unpopulated array of dimensions %s' % (
                 (self.rows, self.cols), )

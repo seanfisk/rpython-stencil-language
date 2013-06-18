@@ -1,5 +1,7 @@
+import os
 import os.path
 
+# import pytest
 from pytest import fixture
 
 from stencil_lang.matrix import from_file
@@ -8,9 +10,7 @@ from stencil_lang.interpreter.stencil import apply_stencil
 from tests.helpers import fixture_path
 
 
-@fixture(params=[
-    'zeros'
-])
+@fixture(params=os.listdir(fixture_path('stencil')))
 def matrix_name(request):
     return request.param
 

@@ -1,5 +1,4 @@
 import sys
-from pprint import isreadable
 
 from pytest import fixture, raises
 from rply import Token
@@ -378,44 +377,3 @@ class TestParser(object):
             assert_exc_info_msg(
                 exc_info,
                 'Array 7 is not initialized. Please CAR first.')
-
-
-class TestTwoDimArray(object):
-    class TestEquality(object):
-        def test_empty(self):
-            assert Matrix(4, 5, []) == Matrix(4, 5, [])
-
-        def test_full(self):
-            assert (Matrix(2, 3, range(6)) ==
-                    Matrix(2, 3, range(6)))
-
-        def test_readable(self):
-            assert isreadable(Matrix(2, 4, range(11)))
-
-    class TestRepr(object):
-        def test_empty(self):
-            assert (repr(Matrix(20, 30, [])) ==
-                    'Matrix(20, 30, [])')
-
-        def test_full(self):
-            assert (
-                repr(Matrix(2, 3, [45, 26, -32.5, 11.1, 0.5, -0.2])) ==
-                'Matrix(2, 3, [45, 26, -32.5, 11.1, 0.5, -0.2])')
-
-    class TestStr(object):
-        def test_empty(self):
-            assert (str(Matrix(4, 5, [])) ==
-                    'Unpopulated array of dimensions (4, 5)')
-
-        def test_full_small(self):
-            # Typical assert order reversed for a nicer multiline diff.
-            assert '''[[0 1 2]
-[3 4 5]]''' == str(Matrix(2, 3, range(6)))
-
-        def test_full_big(self):
-            # Typical assert order reversed for a nicer multiline diff.
-            assert '''[[45 26]
-[-32.5 11]
-[-42.5 73.2000001]
-[11.1 -0.2]]''' == str(Matrix(4, 2, [
-                45, 26, -32.5, 11, -42.5, 73.2000001, 11.1, -0.2]))
