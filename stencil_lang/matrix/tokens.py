@@ -4,6 +4,7 @@
 from stencil_lang.tokens import numbers
 
 tokens = numbers.copy()
+"""Language tokens."""
 tokens['NEWLINE'] = r'\n'
 
 ignores = [
@@ -12,3 +13,4 @@ ignores = [
     # <http://docs.python.org/2/library/re.html#regular-expression-syntax>
     r'[ \t\r\f\v]+',
 ]
+"""Patterns to ignore."""

@@ -4,19 +4,12 @@ API Documentation
 :mod:`stencil_lang` Package
 ---------------------------
 
-:mod:`lexer` Module
--------------------
+:mod:`structures` Module
+------------------------
 
-.. automodule:: stencil_lang.lexer
+.. automodule:: stencil_lang.structures
     :members:
     :undoc-members:
-    :show-inheritance:
-
-:mod:`parser` Module
---------------------
-
-.. automodule:: stencil_lang.parser
-    :members:
     :show-inheritance:
 
 :mod:`tokens` Module
@@ -32,5 +25,12 @@ API Documentation
 
 .. automodule:: stencil_lang.errors
     :members:
-    :undoc-members:
     :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+
+    stencil_lang.interpreter
+    stencil_lang.matrix

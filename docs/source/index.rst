@@ -1,13 +1,11 @@
 Stencil Language
 ================
 
-Contents:
-
 .. toctree::
    :maxdepth: 2
 
    lang_spec
-   api
+   stencil_lang
 
 .. only:: html
 

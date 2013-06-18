@@ -95,5 +95,8 @@ class InconsistentMatrixDimensions(StencilLanguageError):
 
 # Get around limitations in RPython: type(error).__name__ does not work. See
 # stencil_lang/main.py for more information.
-for subclass in StencilLanguageError.__subclasses__():
-    subclass.name = subclass.__name__
+#
+# Use `_subclass' instead of `subclass' so that docs don't pick it up (it is
+# indicated "private").
+for _subclass in StencilLanguageError.__subclasses__():
+    _subclass.name = _subclass.__name__

@@ -25,6 +25,6 @@ def lex(text):
     :param text: text to lex
     :type text: :class:`str`
     :return: parsed stream
-    :rtype: rply.lexer.LexerStream
+    :rtype: :class:`rply.lexer.LexerStream`
     """
     return _lexer.lex(text)
