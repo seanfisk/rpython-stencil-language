@@ -1,8 +1,6 @@
-# Emacs rope configuration
+# Emacs
 .ropeproject
-.project
-.pydevproject
-.settings
+.dir-locals.el
 
 # Python
 *.py[co]
