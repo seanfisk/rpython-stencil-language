@@ -18,7 +18,7 @@ from stencil_lang.errors import (
 pg = ParserGenerator(tokens.keys(), cache_id=__name__)
 
 
-@pg.production('main : rows')
+@pg.production('main : lines')
 @pg.production('main :')
 def main(state, p):
     if p == []:
@@ -34,22 +34,34 @@ def main(state, p):
     return matrix
 
 
-@pg.production('rows : rows row')
-@pg.production('rows : row')
-def rows(state, p):
+# Newline at the end.
+@pg.production('lines : lines line')
+@pg.production('lines : line')
+# No newline at the end.
+@pg.production('lines : lines row')
+@pg.production('lines : row')
+def lines(state, p):
     if len(p) == 2:
-        # rows: rows row
+        # lines: lines line
+        # lines: lines row
         list_list_box = p[0]
         number_list_box = p[1]
         list_list_box.get_list().append(number_list_box.get_list())
     else:
-        # rows: row
+        # lines : line
+        # lines : row
         number_list_box = p[0]
         list_list_box = ListBox([number_list_box.get_list()])
     return list_list_box
 
 
-@pg.production('row : number_list newline')
+@pg.production('line : row newline')
+def line(state, p):
+    row = p[0]
+    return row
+
+
+@pg.production('row : number_list')
 def row(state, p):
     number_list_box = p[0]
     current_cols = len(number_list_box.get_list())
