@@ -87,15 +87,6 @@ class ListBox(ValueBox):
         return self._value
 
 
-class Context(object):
-    """Execution context for the interpreter. Stores all global data."""
-    def __init__(self):
-        self.registers = {}
-        """Register bank for the interpreter."""
-        self.arrays = {}
-        """Array bank for the interpreter."""
-
-
 class Matrix(object):
     """Matrix object for the interpreter."""
     def __init__(self, rows, cols, init_contents):

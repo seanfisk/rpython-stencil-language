@@ -13,7 +13,6 @@ except ImportError:
 
 from stencil_lang import metadata
 from stencil_lang.interpreter import run
-from stencil_lang.structures import Context
 from stencil_lang.errors import StencilLanguageError
 
 
@@ -68,9 +67,8 @@ URL: <%s>
         source_code = input_stream.readall()
     finally:
         input_stream.close()
-    default_context = Context()
     try:
-        run(source_code, default_context)
+        run(source_code)
     except StencilLanguageError as error:
         # The purpose of this except block is two-fold:
         #
