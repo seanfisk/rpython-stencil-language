@@ -177,7 +177,7 @@ class Parser(object):
         return self._parser.parse(text, state=self)
 
 
-def parse(text, state):
+def parse(text):
     """Parse and interpret text using the generated parser.
 
     :param text: text to parse
