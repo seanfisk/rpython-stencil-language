@@ -111,25 +111,37 @@ class Matrix(object):
         return (self.rows == other.rows and self.cols == other.cols and
                 self.contents == other.contents)
 
-    def __getitem__(self, requested_indices):
-        # RPython does not honor this method, so please call it directly.
+    def _check_indices(self, requested_indices):
+        if (not isinstance(requested_indices, tuple)
+                or len(requested_indices) != 2):
+            raise TypeError('Matrix indicies must be a 2-tuple of integers')
+
+    def getitem(self, requested_indices):
+        self._check_indices(requested_indices)
         dimensions = (self.rows, self.cols)
         flat_index = 0
         significance = 1
         for i in xrange(len(dimensions) - 1, -1, -1):
-            dimension = dimensions[i]
             requested_index = requested_indices[i]
+            if requested_index < 0:
+                raise ValueError(
+                    'Matrix indices must be non-negative. '
+                    "Use `getitem_advanced' for wrap-around behavior.")
 
             real_index = requested_index
-            while real_index < 0:
-                real_index += dimension
-            while real_index >= dimension:
-                real_index -= dimension
-
             flat_index += real_index * significance
             significance *= dimensions[i]
 
         return self.contents[flat_index]
+
+    def getitem_advanced(self, requested_indices):
+        self._check_indices(requested_indices)
+        dimensions = (self.rows, self.cols)
+        # Python follows the correct behavior of modulus (always returning
+        # a positive number), so this works.
+        return self.getitem(tuple([
+            requested_indices[i] % dimensions[i] for i in
+            xrange(len(requested_indices))]))
 
     def __repr__(self):
         # RPython does not honor this method, so it is mostly for testing.
