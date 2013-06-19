@@ -1,4 +1,5 @@
 from pytest import raises, fixture
+from rply.errors import LexingError
 
 from stencil_lang.matrix import from_string, from_file
 from stencil_lang.errors import InconsistentMatrixDimensions
@@ -29,6 +30,13 @@ class TestFromString(object):
             exc_info,
             'Inconsistent columns in current row (1) '
             'from those in the first row (2)')
+
+    def test_lex_error(self):
+        with raises(LexingError):
+            from_string('ABCD')
+
+    # TODO: cannot test ParsingError because there is nothing that the parser
+    # knows about but doesn't expect (e.g., numbers).
 
 
 @fixture(params=['simple-newline', 'simple-no-newline'])

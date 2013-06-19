@@ -2,7 +2,7 @@ from pprint import isreadable
 
 from pytest import fixture, raises
 
-from stencil_lang.structures import Matrix
+from stencil_lang.structures import Matrix, ValueBox
 
 from tests.helpers import assert_exc_info_msg
 
@@ -10,6 +10,12 @@ from tests.helpers import assert_exc_info_msg
 @fixture
 def mat():
     return Matrix(3, 4, range(12))
+
+
+class TestValueBox(object):
+    def test_repr(self):
+        box = ValueBox(['abcd', 123])
+        assert repr(box) == "ValueBox(['abcd', 123])"
 
 
 class TestMatrix(object):

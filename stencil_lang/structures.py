@@ -22,6 +22,15 @@ from rply.token import BaseBox
 
 class ValueBox(BaseBox):
     """Box created solely to add a repr."""
+    def __init__(self, value):
+        """Override this __init__ method with a method exactly like it (for
+        RPython's type checking.)
+
+        :param value: the number to store
+        :type value: :class:`object`
+        """
+        self._value = value
+
     def __repr__(self):
         # RPython does not honor this method, so it is solely for testing.
         return '%s(%s)' % (type(self).__name__, self._value)

@@ -27,7 +27,7 @@ class UninitializedVariableError(StencilLanguageError):
         elif self._type == 'Array':
             remedy = 'CAR'
         else:
-            raise TypeError('Invalid variable type')
+            raise TypeError('Invalid variable type: %s' % self._type)
         return '%s %d is not initialized. Please %s first.' % (
             self._type, self._var_num, remedy)
 
