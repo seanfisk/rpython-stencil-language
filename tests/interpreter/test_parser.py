@@ -1,9 +1,11 @@
 import sys
 
 from pytest import fixture, raises
+from mock import create_autospec, sentinel
 from rply import Token
 
 from stencil_lang.interpreter.parser import Parser
+from stencil_lang.interpreter.stencil import apply_stencil
 from stencil_lang.structures import Matrix
 from stencil_lang.errors import (
     UninitializedVariableError,
@@ -12,16 +14,44 @@ from stencil_lang.errors import (
     ParseError,
 )
 
-from tests.helpers import lit, assert_exc_info_msg
+from tests.helpers import lit, assert_exc_info_msg, open_matrix
 
 
 def make_token_iter(token_tuple_list):
     return iter(Token(name, value) for name, value in token_tuple_list)
 
 
+def create_matrix_tokens(matrix, matrix_num):
+    tokens = [
+        lit('CAR'),
+        ('POS_INT', str(matrix_num)),
+        ('POS_INT', str(matrix.rows)),
+        ('POS_INT', str(matrix.cols)),
+        lit('SAR'),
+        ('POS_INT', str(matrix_num)),
+    ]
+    for num in matrix.contents:
+        if isinstance(num, float):
+            token = ('REAL', str(num))
+        elif isinstance(num, int):
+            if num >= 0:
+                token = ('POS_INT', str(num))
+            else:
+                token = ('NEG_INT', str(num))
+        else:
+            raise TypeError('Invalid number in matrix!')
+        tokens.append(token)
+    return tokens
+
+
 @fixture
-def parser():
-    return Parser()
+def mock_apply_stencil():
+    return create_autospec(apply_stencil, spec_set=True)
+
+
+@fixture
+def parser(mock_apply_stencil):
+    return Parser(mock_apply_stencil)
 
 
 class TestParser(object):
@@ -379,6 +409,23 @@ class TestParser(object):
                 'Array 7 is not initialized. Please CAR first.')
 
     class TestPde(object):
-        @fixture
-        def mock_apply_stencil():
-            pass
+        def test_car_sar_pde(self, parser, mock_apply_stencil):
+            mock_apply_stencil.return_value = sentinel.transformed_matrix
+
+            stencil = open_matrix('stencil', 'ints')
+            matrix = open_matrix('before', 'ints')
+            tokens = create_matrix_tokens(stencil, 10)
+            tokens += create_matrix_tokens(matrix, 20)
+            tokens += [
+                lit('PDE'),
+                ('POS_INT', 10),
+                ('POS_INT', 20),
+            ]
+            parser.parse(make_token_iter(tokens))
+
+            # Stencil should not have changed.
+            assert parser.arrays[10] == stencil
+            # Matrix should have been swapped with the transformed matrix.
+            assert parser.arrays[20] == sentinel.transformed_matrix
+
+            mock_apply_stencil.assert_called_once_with(stencil, matrix)

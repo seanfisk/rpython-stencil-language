@@ -3,21 +3,16 @@ import os.path
 
 from pytest import fixture, raises
 
-from stencil_lang.matrix import from_file
 from stencil_lang.interpreter.stencil import apply_stencil
 from stencil_lang.structures import Matrix
 from stencil_lang.errors import InvalidStencilDimensionsError
 
-from tests.helpers import fixture_path, assert_exc_info_msg
+from tests.helpers import fixture_path, assert_exc_info_msg, open_matrix
 
 
 @fixture(params=os.listdir(fixture_path('stencil')))
 def matrix_name(request):
     return request.param
-
-
-def open_matrix(matrix_type, matrix_name):
-    return from_file(fixture_path(os.path.join(matrix_type, matrix_name)))
 
 
 class TestApplyStencil(object):

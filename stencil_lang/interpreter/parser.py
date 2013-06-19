@@ -15,11 +15,16 @@ from stencil_lang.errors import (
     ArgumentError,
     ParseError,
 )
+from stencil_lang.interpreter.stencil import apply_stencil
 
 
 class Parser(object):
     """Source code parser and intepreter."""
-    def __init__(self):
+    def __init__(self, apply_stencil):
+        """:param apply_stencil: the apply_stencil function
+        :type apply_stencil: :class:`function`
+        """
+        self._apply_stencil = apply_stencil
         self.registers = {}
         """Register bank for the interpreter."""
         self.arrays = {}
@@ -43,6 +48,7 @@ class Parser(object):
     @_pg.production('stmt : car')
     @_pg.production('stmt : pa')
     @_pg.production('stmt : sar')
+    @_pg.production('stmt : pde')
     def _stmt(self, p):
         pass
 
@@ -104,6 +110,13 @@ class Parser(object):
         if num_given_args != num_required_args:
             raise ArgumentError(num_required_args, num_given_args)
         two_dim_array.contents = number_list
+
+    @_pg.production('pde : PDE index index')
+    def _pde(self, p):
+        stencil_index = p[1].get_int()
+        matrix_index = p[2].get_int()
+        self.arrays[matrix_index] = self._apply_stencil(
+            self.arrays[stencil_index], self.arrays[matrix_index])
 
     # number_list must come first to parse the first number s first.
     @_pg.production('number_list : number_list number')
@@ -168,4 +181,4 @@ def parse(text, state):
     :return: the final value parsed
     :rtype: :class:`rply.token.BaseBox`
     """
-    return Parser().parse(text)
+    return Parser(apply_stencil).parse(text)

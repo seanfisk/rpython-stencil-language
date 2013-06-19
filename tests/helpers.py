@@ -1,5 +1,7 @@
 import os.path
 
+from stencil_lang.matrix import from_file
+
 
 def lit(name):
     """Make a literal token tuple."""
@@ -18,3 +20,7 @@ def fixture_path(rel_path):
     :type rel_path: :class:`str`
     """
     return os.path.join(os.path.dirname(__file__), 'fixtures', rel_path)
+
+
+def open_matrix(matrix_type, matrix_name):
+    return from_file(fixture_path(os.path.join(matrix_type, matrix_name)))
