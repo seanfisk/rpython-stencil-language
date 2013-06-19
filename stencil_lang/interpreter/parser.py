@@ -32,6 +32,18 @@ class Parser(object):
 
     _pg = ParserGenerator(tokens.keys(), cache_id=__name__)
 
+    def _safe_get_array(self, array_num):
+        try:
+            return self.arrays[array_num]
+        except KeyError:
+            raise UninitializedVariableError('Array', array_num)
+
+    def _safe_get_register(self, register_num):
+        try:
+            return self.registers[register_num]
+        except KeyError:
+            raise UninitializedVariableError('Register', register_num)
+
     @_pg.production('main : stmt_list')
     def _main(self, p):
         pass
@@ -62,10 +74,7 @@ class Parser(object):
     @_pg.production('pr : PR index')
     def _pr(self, p):
         index = p[1].get_int()
-        try:
-            print self.registers[index]
-        except KeyError:
-            raise UninitializedVariableError('Register', index)
+        print self._safe_get_register(index)
 
     @_pg.production('add : ADD index number')
     def _add(self, p):
@@ -90,21 +99,15 @@ class Parser(object):
     @_pg.production('pa : PA index')
     def _pa(self, p):
         index = p[1].get_int()
-        try:
-            # RPython does not honor most magic methods. Hence, just `print'
-            # will work in tests but not when translated.
-            print self.arrays[index].__str__()
-        except KeyError:
-            raise UninitializedVariableError('Array', index)
+        # RPython does not honor most magic methods. Hence, just `print'
+        # will work in tests but not when translated.
+        print self._safe_get_array(index).__str__()
 
     @_pg.production('sar : SAR index number_list')
     def _sar(self, p):
         index = p[1].get_int()
         number_list = p[2].get_list()
-        try:
-            two_dim_array = self.arrays[index]
-        except KeyError:
-            raise UninitializedVariableError('Array', index)
+        two_dim_array = self._safe_get_array(index)
         num_required_args = two_dim_array.rows * two_dim_array.cols
         num_given_args = len(number_list)
         if num_given_args != num_required_args:
@@ -114,9 +117,10 @@ class Parser(object):
     @_pg.production('pde : PDE index index')
     def _pde(self, p):
         stencil_index = p[1].get_int()
+        stencil = self._safe_get_array(stencil_index)
         matrix_index = p[2].get_int()
-        self.arrays[matrix_index] = self._apply_stencil(
-            self.arrays[stencil_index], self.arrays[matrix_index])
+        matrix = self._safe_get_array(matrix_index)
+        self.arrays[matrix_index] = self._apply_stencil(stencil, matrix)
 
     # number_list must come first to parse the first number s first.
     @_pg.production('number_list : number_list number')

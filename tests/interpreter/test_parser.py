@@ -429,3 +429,39 @@ class TestParser(object):
             assert parser.arrays[20] == sentinel.transformed_matrix
 
             mock_apply_stencil.assert_called_once_with(stencil, matrix)
+
+        def test_pde_uninitialized_stencil(self, parser, mock_apply_stencil):
+            matrix = open_matrix('before', 'ints')
+            tokens = create_matrix_tokens(matrix, 20)
+            tokens += [
+                lit('PDE'),
+                ('POS_INT', 10),
+                ('POS_INT', 20),
+            ]
+            with raises(UninitializedVariableError) as exc_info:
+                parser.parse(make_token_iter(tokens))
+            assert_exc_info_msg(
+                exc_info, 'Array 10 is not initialized. Please CAR first.')
+
+            # Matrix should not have changed.
+            assert parser.arrays[20] == matrix
+            # Should not have called apply_stencil.
+            assert mock_apply_stencil.call_count == 0
+
+        def test_pde_uninitialized_matrix(self, parser, mock_apply_stencil):
+            stencil = open_matrix('stencil', 'ints')
+            tokens = create_matrix_tokens(stencil, 10)
+            tokens += [
+                lit('PDE'),
+                ('POS_INT', 10),
+                ('POS_INT', 20),
+            ]
+            with raises(UninitializedVariableError) as exc_info:
+                parser.parse(make_token_iter(tokens))
+            assert_exc_info_msg(
+                exc_info, 'Array 20 is not initialized. Please CAR first.')
+
+            # Stencil should not have changed.
+            assert parser.arrays[10] == stencil
+            # Should not have called apply_stencil.
+            assert mock_apply_stencil.call_count == 0
