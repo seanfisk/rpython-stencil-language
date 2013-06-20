@@ -4,12 +4,7 @@
 
 import sys
 
-try:
-    # PyPy >= 2.0-beta2
-    from rpython.rlib.streamio import open_file_as_stream
-except ImportError:
-    # PyPy <= 2.0-beta1
-    from pypy.rlib.streamio import open_file_as_stream
+from rpython.rlib.streamio import open_file_as_stream
 
 from stencil_lang import metadata
 from stencil_lang.interpreter import run
@@ -102,12 +97,7 @@ def jitpolicy(driver):
     :return: jit policy
     :rtype: :class:`pypy.jit.codewriter.policy.JitPolicy`
     """
-    try:
-        # PyPy >= 2.0-beta2
-        from rpython.jit.codewriter.policy import JitPolicy
-    except ImportError:
-        # PyPy <= 2.0-beta1
-        from pypy.jit.codewriter.policy import JitPolicy
+    from rpython.jit.codewriter.policy import JitPolicy
 
     return JitPolicy()
 

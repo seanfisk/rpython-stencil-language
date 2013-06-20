@@ -2,6 +2,7 @@
 """
 
 from rply.token import BaseBox
+from rpython.rlib.rarithmetic import r_uint
 
 # Thought these boxes do the same thing, they all need to exist because they
 # hold different types. In addition, a separate __init__ and accessors with
@@ -112,36 +113,36 @@ class Matrix(object):
                 self.contents == other.contents)
 
     def _check_indices(self, requested_indices):
-        if (not isinstance(requested_indices, tuple)
+        if (not isinstance(requested_indices, list)
                 or len(requested_indices) != 2):
-            raise TypeError('Matrix indicies must be a 2-tuple of integers')
+            raise TypeError(
+                'Matrix indices must be a list of integers of length 2')
 
     def getitem(self, requested_indices):
         self._check_indices(requested_indices)
-        dimensions = (self.rows, self.cols)
+        dimensions = [self.rows, self.cols]
         flat_index = 0
         significance = 1
+        # Cannot use reversed(), so we must iterate reversed the "old way".
         for i in xrange(len(dimensions) - 1, -1, -1):
             requested_index = requested_indices[i]
             if requested_index < 0:
                 raise ValueError(
                     'Matrix indices must be non-negative. '
                     "Use `getitem_advanced' for wrap-around behavior.")
-
-            real_index = requested_index
-            flat_index += real_index * significance
+            flat_index += requested_index * significance
             significance *= dimensions[i]
 
         return self.contents[flat_index]
 
     def getitem_advanced(self, requested_indices):
         self._check_indices(requested_indices)
-        dimensions = (self.rows, self.cols)
+        dimensions = [self.rows, self.cols]
         # Python follows the correct behavior of modulus (always returning
         # a positive number), so this works.
-        return self.getitem(tuple([
-            requested_indices[i] % dimensions[i] for i in
-            xrange(len(requested_indices))]))
+        return self.getitem([
+            requested_indices[i] % dimensions[i] for i
+            in xrange(len(requested_indices))])
 
     def __repr__(self):
         # RPython does not honor this method, so it is mostly for testing.
@@ -151,12 +152,16 @@ class Matrix(object):
     def __str__(self):
         # RPython does not honor this method, so please call it directly.
         if self.contents == []:
-            return 'Unpopulated array of dimensions %s' % (
-                (self.rows, self.cols), )
+            return 'Unpopulated array of dimensions (%d, %d)' % (
+                self.rows, self.cols)
         row_strs = []
-        for r in xrange(self.rows):
-            this_row_index = r * self.cols
-            next_row_index = (r + 1) * self.cols
+
+        # Tell RPython that these won't, in fact, be negative.
+        rows = r_uint(self.rows)
+        cols = r_uint(self.cols)
+        for r in xrange(rows):
+            this_row_index = r * cols
+            next_row_index = (r + 1) * cols
             nums_str_list = [
                 str(num) for num in
                 self.contents[this_row_index:next_row_index]]

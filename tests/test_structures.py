@@ -29,57 +29,61 @@ class TestMatrix(object):
 
     class TestGetitem(object):
         def test_regular(self, mat):
-            assert mat.getitem((0, 2)) == 2
+            assert mat.getitem([0, 2]) == 2
 
         def test_negative_error(self, mat):
             with raises(ValueError) as exc_info:
-                mat.getitem((-1, 5))
+                mat.getitem([-1, 5])
             assert_exc_info_msg(
                 exc_info, 'Matrix indices must be non-negative. '
                 "Use `getitem_advanced' for wrap-around behavior.")
 
-        def test_one_tuple(self, mat):
+        def test_list_length_one(self, mat):
             with raises(TypeError) as exc_info:
-                mat.getitem((1, ))
+                mat.getitem([1])
             assert_exc_info_msg(
-                exc_info, 'Matrix indicies must be a 2-tuple of integers')
+                exc_info,
+                'Matrix indices must be a list of integers of length 2')
 
         def test_str(self, mat):
             with raises(TypeError) as exc_info:
                 mat.getitem('abcd')
             assert_exc_info_msg(
-                exc_info, 'Matrix indicies must be a 2-tuple of integers')
+                exc_info,
+                'Matrix indices must be a list of integers of length 2')
 
     class TestGetitemAdvanced(object):
         def test_regular(self, mat):
-            assert mat.getitem_advanced((0, 2)) == 2
+            assert mat.getitem_advanced([0, 2]) == 2
 
         def test_negative(self, mat):
-            assert mat.getitem_advanced((-2, 1)) == 5
+            assert mat.getitem_advanced([-2, 1]) == 5
 
         def test_double_negative(self, mat):
-            assert mat.getitem_advanced((-1, -1)) == 11
+            assert mat.getitem_advanced([-1, -1]) == 11
 
         def test_past_bounds(self, mat):
-            assert mat.getitem_advanced((4, 0)) == 4
+            assert mat.getitem_advanced([4, 0]) == 4
 
         def test_double_past_bounds(self, mat):
-            assert mat.getitem_advanced((4, 4)) == 4
+            assert mat.getitem_advanced([4, 4]) == 4
 
         def test_double_wraparound(self, mat):
-            assert mat.getitem_advanced((6, -6)) == 2
+            assert mat.getitem_advanced([6, -6]) == 2
 
-        def test_one_tuple(self, mat):
+        def test_list_length_one(self, mat):
             with raises(TypeError) as exc_info:
-                mat.getitem((1, ))
+                mat.getitem([1])
             assert_exc_info_msg(
-                exc_info, 'Matrix indicies must be a 2-tuple of integers')
+                exc_info,
+                'Matrix indices must be a list of integers of length 2')
 
         def test_str(self, mat):
             with raises(TypeError) as exc_info:
                 mat.getitem('abcd')
             assert_exc_info_msg(
-                exc_info, 'Matrix indicies must be a 2-tuple of integers')
+                exc_info,
+                'Matrix indices must be a list of integers of length 2')
 
     class TestRepr(object):
         def test_empty(self):

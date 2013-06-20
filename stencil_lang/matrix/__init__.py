@@ -4,9 +4,6 @@
 try:
     # PyPy >= 2.0-beta2
     from rpython.rlib.streamio import open_file_as_stream
-except ImportError:
-    # PyPy <= 2.0-beta1
-    from pypy.rlib.streamio import open_file_as_stream
 
 from stencil_lang.matrix.lexer import lex
 from stencil_lang.matrix.parser import parse

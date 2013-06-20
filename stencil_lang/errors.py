@@ -98,12 +98,13 @@ class InvalidStencilDimensionsError(StencilLanguageError):
     dimensions are not correct for that usage."""
     def __init__(self, dimensions):
         """:param dimensions: new dimensions of array
-        :type dimensions: :class:`tuple` of (:class:`int`, :class:`int`)
+        :type dimensions: :class:`list` of (:class:`int`, :class:`int`)
         """
         self._dimensions = dimensions
 
     def __str__(self):
-        return 'Invalid odd dimensions for stencil: %s' % (self._dimensions, )
+        return 'Invalid odd dimensions for stencil: (%d, %d)' % (
+            self._dimensions[0], self._dimensions[1])
 
 
 # Get around limitations in RPython: type(error).__name__ does not work. See

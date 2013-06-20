@@ -22,7 +22,7 @@ def _make_halo(matrix, num_row_layers, num_col_layers):
                   [])
     for r in xrange(-num_row_layers, matrix.rows + num_row_layers):
         for c in xrange(-num_col_layers, matrix.cols + num_col_layers):
-            halo.contents.append(matrix.getitem_advanced((r, c)))
+            halo.contents.append(matrix.getitem_advanced([r, c]))
     return halo
 
 
@@ -36,7 +36,7 @@ def apply_stencil(stencil, matrix):
     :return: the generated matrix
     :rtype: :class:`stencil_lang.structures.Matrix`
     """
-    stencil_dims = (stencil.rows, stencil.cols)
+    stencil_dims = [stencil.rows, stencil.cols]
     for dim in stencil_dims:
         if dim % 2 == 0:
             raise InvalidStencilDimensionsError(stencil_dims)
@@ -46,10 +46,10 @@ def apply_stencil(stencil, matrix):
     new_matrix = Matrix(matrix.rows, matrix.cols, [])
     for r in xrange(matrix.rows):
         for c in xrange(matrix.cols):
-            new_value = halo.getitem((r + num_row_layers, c + num_col_layers))
+            new_value = halo.getitem([r + num_row_layers, c + num_col_layers])
             for st_r in xrange(stencil.rows):
                 for st_c in xrange(stencil.cols):
-                    new_value += (stencil.getitem((st_r, st_c)) *
-                                  halo.getitem((r + st_r, c + st_c)))
+                    new_value += (stencil.getitem([st_r, st_c]) *
+                                  halo.getitem([r + st_r, c + st_c]))
             new_matrix.contents.append(new_value)
     return new_matrix
