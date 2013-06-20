@@ -177,7 +177,8 @@ def _big_text(text):
 
 @task
 @cmdopts([
-    ('jit', 'j', 'Use jit instead of the default optimization')
+    ('jit', 'j', 'Use jit instead of the default optimization'),
+    ('view', '', 'Annotate and view using the RPython Pygame viewer'),
 ])
 def translate(options):
     """Translate the interpreter using the RPython toolchain."""
@@ -188,6 +189,8 @@ def translate(options):
         env = {'PYTHONPATH': '.'}
         env.update(os.environ)
         cmd_flags = ['--make-jobs', str(cpus)]
+        if 'view' in options.translate:
+            cmd_flags += ['--annotate', '--view']
         if 'jit' in options.translate:
             cmd_flags += ['--output', 'stencil-jit', '--opt=jit']
         else:
