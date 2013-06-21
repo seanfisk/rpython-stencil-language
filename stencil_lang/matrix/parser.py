@@ -3,7 +3,7 @@
 
 from rply import ParserGenerator
 
-from stencil_lang.matrix.tokens import tokens
+from stencil_lang.matrix.tokens import TOKENS
 from stencil_lang.structures import (
     IntBox,
     FloatBox,
@@ -21,7 +21,7 @@ class Parser(object):
     def __init__(self):
         self._cols = -1
 
-    _pg = ParserGenerator(tokens.keys(), cache_id=__name__)
+    _pg = ParserGenerator(TOKENS.keys(), cache_id=__name__)
 
     @_pg.production('main : lines')
     @_pg.production('main :')

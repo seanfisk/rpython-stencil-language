@@ -1,13 +1,13 @@
 """:mod:`stencil_lang.matrix.tokens` -- Tokens for lexing and parsing
 """
 
-from stencil_lang.tokens import numbers
+from stencil_lang.tokens import NUMBERS
 
-tokens = numbers.copy()
+TOKENS = NUMBERS.copy()
 """Language tokens."""
-tokens['NEWLINE'] = r'\n'
+TOKENS['NEWLINE'] = r'\n'
 
-ignores = [
+IGNORES = [
     # Ignore all spaces besides the newline character. Jacked this from here
     # and remove the newline `\n' character.
     # <http://docs.python.org/2/library/re.html#regular-expression-syntax>

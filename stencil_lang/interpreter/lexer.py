@@ -2,15 +2,15 @@
 """
 from rply import LexerGenerator
 
-from stencil_lang.interpreter.tokens import tokens
-from stencil_lang.tokens import ignores
+from stencil_lang.interpreter.tokens import TOKENS
+from stencil_lang.tokens import IGNORES
 
 lg = LexerGenerator()
 
-for rule_name, regex in tokens.iteritems():
+for rule_name, regex in TOKENS.iteritems():
     lg.add(rule_name, regex)
 
-for regex in ignores:
+for regex in IGNORES:
     lg.ignore(regex)
 
 # This has to be called outside a function because the parser must be generated

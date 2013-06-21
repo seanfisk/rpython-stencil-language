@@ -1,9 +1,9 @@
 """:mod:`stencil_lang.interpreter.tokens` -- Tokens for lexing and parsing
 """
 
-from stencil_lang.tokens import numbers
+from stencil_lang.tokens import NUMBERS
 
-literals = [
+LITERALS = [
     'STO',
     'PR',
     'ADD',
@@ -14,8 +14,8 @@ literals = [
 ]
 """Language literals, i.e., the name is the same as the value."""
 
-tokens = numbers.copy()
+TOKENS = NUMBERS.copy()
 # Update tokens with literals. Beware that any token duplicated in tokens and
 # literals will be overwritten with the value from literals.
-for literal in literals:
-    tokens[literal] = literal
+for literal in LITERALS:
+    TOKENS[literal] = literal

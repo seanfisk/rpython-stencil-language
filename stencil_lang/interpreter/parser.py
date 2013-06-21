@@ -2,7 +2,7 @@
 """
 from rply import ParserGenerator
 
-from stencil_lang.interpreter.tokens import tokens
+from stencil_lang.interpreter.tokens import TOKENS
 from stencil_lang.structures import (
     IntBox,
     FloatBox,
@@ -30,7 +30,7 @@ class Parser(object):
         self.matrices = {}
         """Matrix bank for the interpreter."""
 
-    _pg = ParserGenerator(tokens.keys(), cache_id=__name__)
+    _pg = ParserGenerator(TOKENS.keys(), cache_id=__name__)
 
     def _safe_get_matrix(self, matrix_num):
         try:

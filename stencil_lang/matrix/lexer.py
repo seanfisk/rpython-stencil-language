@@ -3,14 +3,14 @@
 
 from rply import LexerGenerator
 
-from stencil_lang.matrix.tokens import tokens, ignores
+from stencil_lang.matrix.tokens import TOKENS, IGNORES
 
 lg = LexerGenerator()
 
-for rule_name, regex in tokens.iteritems():
+for rule_name, regex in TOKENS.iteritems():
     lg.add(rule_name, regex)
 
-for regex in ignores:
+for regex in IGNORES:
     lg.ignore(regex)
 
 # This has to be called outside a function because the parser must be generated
