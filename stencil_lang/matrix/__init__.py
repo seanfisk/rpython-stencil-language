@@ -1,9 +1,7 @@
 """:mod:`stencil_lang.matrix` --- Parse matrices from strings/files
 """
 
-try:
-    # PyPy >= 2.0-beta2
-    from rpython.rlib.streamio import open_file_as_stream
+from rpython.rlib.streamio import open_file_as_stream
 
 from stencil_lang.matrix.lexer import lex
 from stencil_lang.matrix.parser import parse
