@@ -107,12 +107,12 @@ class Parser(object):
     def _sar(self, p):
         index = p[1].get_int()
         number_list = p[2].get_list()
-        two_dim_array = self._safe_get_array(index)
-        num_required_args = two_dim_array.rows * two_dim_array.cols
+        array = self._safe_get_array(index)
+        num_required_args = array.rows * array.cols
         num_given_args = len(number_list)
         if num_given_args != num_required_args:
             raise ArgumentError(num_required_args, num_given_args)
-        two_dim_array.contents = number_list
+        array.contents = number_list
 
     @_pg.production('pde : PDE index index')
     def _pde(self, p):
