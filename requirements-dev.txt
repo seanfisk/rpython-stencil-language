@@ -7,7 +7,7 @@ colorama
 pyfiglet
 
 # testing
-flake8
-mock
-pytest
-tox
+flake8>=2.0.0
+mock>=1.0.1
+pytest>=2.3.0
+tox>=1.4
