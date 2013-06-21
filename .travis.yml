@@ -6,5 +6,8 @@ env:
   - TOXENV=docs
 install:
   - pip install tox
+  # Unabashedly (and unsurprisingly) mostly stolen from here:
+  # <https://github.com/alex/rply/blob/master/.travis.yml>
+  - wget https://bitbucket.org/pypy/pypy/downloads/pypy-2.0.2-src.tar.bz2 --output-document - | tar --extract --bzip2 --directory=..
 script:
-  - tox
+  - PYTHONPATH="$PYTHONPATH:../pypy-2.0.2-src" tox
