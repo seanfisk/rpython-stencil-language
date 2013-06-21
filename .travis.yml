@@ -4,14 +4,13 @@ env:
   - TOXENV=py27
   - TOXENV=pypy
   - TOXENV=docs
-install:
-  - pip install tox
+before_install:
   # Unabashedly (and unsurprisingly) mostly stolen from here:
   # <https://github.com/alex/rply/blob/master/.travis.yml>
-  - wget https://bitbucket.org/pypy/pypy/downloads/pypy-2.0.2-src.tar.bz2 --output-document - | tar --extract --bzip2 --directory=..
-  # Prevent PyPy's vendorized version of pytest from shadowing my newer one that tox installs (the dirty way).
   #
-  # NOTE: The cleaner way to do this is to create an empty directory and link the rpython package in there (that's the package in which we're interested) and then set the PYTHONPATH to that directory. Since we don't need to use PyPy's vendorized pytest, though, just blow it away.
-  - rm ../pypy-2.0.2-src/pytest.py
+  # Prevent PyPy's vendorized version of pytest from shadowing my newer one that tox installs by only extracting the rpython directory.
+  - wget https://bitbucket.org/pypy/pypy/downloads/pypy-2.0.2-src.tar.bz2 --output-document - | tar --extract --bzip2 pypy-2.0.2-src/rpython
+install:
+  - pip install tox
 script:
   - PYTHONPATH="$PYTHONPATH:../pypy-2.0.2-src" tox
