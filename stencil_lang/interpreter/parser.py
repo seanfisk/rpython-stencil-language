@@ -57,9 +57,9 @@ class Parser(object):
     @_pg.production('stmt : sto')
     @_pg.production('stmt : pr')
     @_pg.production('stmt : add')
-    @_pg.production('stmt : car')
-    @_pg.production('stmt : pa')
-    @_pg.production('stmt : sar')
+    @_pg.production('stmt : cmx')
+    @_pg.production('stmt : pmx')
+    @_pg.production('stmt : smx')
     @_pg.production('stmt : pde')
     def _stmt(self, p):
         pass
@@ -87,8 +87,8 @@ class Parser(object):
         except KeyError:
             raise UninitializedVariableError('Register', index)
 
-    @_pg.production('car : CAR index pos_int pos_int')
-    def _car(self, p):
+    @_pg.production('cmx : CMX index pos_int pos_int')
+    def _cmx(self, p):
         index = p[1].get_int()
         rows = p[2].get_int()
         cols = p[3].get_int()
@@ -96,15 +96,15 @@ class Parser(object):
             raise InvalidMatrixDimensionsError(index, (rows, cols))
         self.matrices[index] = Matrix(rows, cols, [])
 
-    @_pg.production('pa : PA index')
-    def _pa(self, p):
+    @_pg.production('pmx : PMX index')
+    def _pmx(self, p):
         index = p[1].get_int()
         # RPython does not honor most magic methods. Hence, just `print'
         # will work in tests but not when translated.
         print self._safe_get_matrix(index).__str__()
 
-    @_pg.production('sar : SAR index number_list')
-    def _sar(self, p):
+    @_pg.production('smx : SMX index number_list')
+    def _smx(self, p):
         index = p[1].get_int()
         number_list = p[2].get_list()
         matrix = self._safe_get_matrix(index)

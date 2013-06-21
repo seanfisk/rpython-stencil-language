@@ -25,7 +25,7 @@ class UninitializedVariableError(StencilLanguageError):
         if self._type == 'Register':
             remedy = 'STO'
         elif self._type == 'Matrix':
-            remedy = 'CAR'
+            remedy = 'CMX'
         else:
             raise TypeError('Invalid variable type: %s' % self._type)
         return '%s %d is not initialized. Please %s first.' % (

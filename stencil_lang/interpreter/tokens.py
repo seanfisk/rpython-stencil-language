@@ -7,9 +7,9 @@ literals = [
     'STO',
     'PR',
     'ADD',
-    'CAR',
-    'PA',
-    'SAR',
+    'CMX',
+    'PMX',
+    'SMX',
     'PDE',
 ]
 """Language literals, i.e., the name is the same as the value."""

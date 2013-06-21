@@ -23,11 +23,11 @@ def make_token_iter(token_tuple_list):
 
 def create_matrix_tokens(matrix, matrix_num):
     tokens = [
-        lit('CAR'),
+        lit('CMX'),
         ('POS_INT', str(matrix_num)),
         ('POS_INT', str(matrix.rows)),
         ('POS_INT', str(matrix.cols)),
-        lit('SAR'),
+        lit('SMX'),
         ('POS_INT', str(matrix_num)),
     ]
     for num in matrix.contents:
@@ -203,10 +203,10 @@ class TestParser(object):
                 exc_info,
                 'Register 7 is not initialized. Please STO first.')
 
-    class TestCar(object):
+    class TestCmx(object):
         def test_internals(self, parser):
             parser.parse(make_token_iter([
-                lit('CAR'),
+                lit('CMX'),
                 ('POS_INT', '22'),
                 ('POS_INT', '33'),
                 ('POS_INT', '11'),
@@ -216,7 +216,7 @@ class TestParser(object):
         def test_negative_matrix_index(self, parser):
             with raises(ParseError) as exc_info:
                 parser.parse(make_token_iter([
-                    lit('CAR'),
+                    lit('CMX'),
                     ('NEG_INT', '-22'),
                     ('POS_INT', '20'),
                     ('POS_INT', '20'),
@@ -226,7 +226,7 @@ class TestParser(object):
         def test_neg_dimension(self, parser):
             with raises(ParseError) as exc_info:
                 parser.parse(make_token_iter([
-                    lit('CAR'),
+                    lit('CMX'),
                     ('POS_INT', '11'),
                     ('POS_INT', '12'),
                     ('NEG_INT', '-13'),
@@ -236,7 +236,7 @@ class TestParser(object):
         def test_zero_rows(self, parser):
             with raises(InvalidMatrixDimensionsError) as exc_info:
                 parser.parse(make_token_iter([
-                    lit('CAR'),
+                    lit('CMX'),
                     ('POS_INT', '11'),
                     ('POS_INT', '0'),
                     ('POS_INT', '32'),
@@ -247,7 +247,7 @@ class TestParser(object):
         def test_zero_cols(self, parser):
             with raises(InvalidMatrixDimensionsError) as exc_info:
                 parser.parse(make_token_iter([
-                    lit('CAR'),
+                    lit('CMX'),
                     ('POS_INT', '11'),
                     ('POS_INT', '7'),
                     ('POS_INT', '0'),
@@ -258,11 +258,11 @@ class TestParser(object):
     class TestPa(object):
         def test_empty(self, parser, capsys):
             parser.parse(make_token_iter([
-                lit('CAR'),
+                lit('CMX'),
                 ('POS_INT', '40'),
                 ('POS_INT', '22'),
                 ('POS_INT', '78'),
-                lit('PA'),
+                lit('PMX'),
                 ('POS_INT', '40'),
             ]))
             out, err = capsys.readouterr()
@@ -273,49 +273,49 @@ class TestParser(object):
         def test_uninitialized(self, parser, capsys):
             with raises(UninitializedVariableError) as exc_info:
                 parser.parse(make_token_iter([
-                    lit('PA'),
+                    lit('PMX'),
                     ('POS_INT', '20'),
                 ]))
             assert_exc_info_msg(
                 exc_info,
-                'Matrix 20 is not initialized. Please CAR first.')
+                'Matrix 20 is not initialized. Please CMX first.')
             # Should not have printed anything.
             out, err = capsys.readouterr()
             assert out == ''
             assert err == ''
 
-        def test_pa_one_row_matrix(self, parser, capsys):
+        def test_pmx_one_row_matrix(self, parser, capsys):
             parser.parse(make_token_iter([
-                lit('CAR'),
+                lit('CMX'),
                 ('POS_INT', '22'),
                 ('POS_INT', '1'),
                 ('POS_INT', '4'),
-                lit('SAR'),
+                lit('SMX'),
                 ('POS_INT', '22'),
                 ('REAL', '23.2'),
                 ('REAL', '-42.11'),
                 ('REAL', '54.001'),
                 ('REAL', '7.11'),
-                lit('PA'),
+                lit('PMX'),
                 ('POS_INT', '22'),
             ]))
             out, err = capsys.readouterr()
             assert out == '[[23.2 -42.11 54.001 7.11]]\n'
             assert err == ''
 
-        def test_pa_one_col_matrix(self, parser, capsys):
+        def test_pmx_one_col_matrix(self, parser, capsys):
             parser.parse(make_token_iter([
-                lit('CAR'),
+                lit('CMX'),
                 ('POS_INT', '22'),
                 ('POS_INT', '4'),
                 ('POS_INT', '1'),
-                lit('SAR'),
+                lit('SMX'),
                 ('POS_INT', '22'),
                 ('REAL', '23.2'),
                 ('REAL', '-42.11'),
                 ('REAL', '54.001'),
                 ('REAL', '7.11'),
-                lit('PA'),
+                lit('PMX'),
                 ('POS_INT', '22'),
             ]))
             out, err = capsys.readouterr()
@@ -326,13 +326,13 @@ class TestParser(object):
 ''' == out
             assert err == ''
 
-        def test_car_sar_pa(self, parser, capsys):
+        def test_cmx_smx_pmx(self, parser, capsys):
             parser.parse(make_token_iter([
-                lit('CAR'),
+                lit('CMX'),
                 ('POS_INT', '31'),
                 ('POS_INT', '2'),
                 ('POS_INT', '3'),
-                lit('SAR'),
+                lit('SMX'),
                 ('POS_INT', '31'),
                 # Contents
                 ('REAL', '-13.4'),
@@ -341,7 +341,7 @@ class TestParser(object):
                 ('POS_INT', '-42'),
                 ('REAL', '34.8'),
                 ('REAL', '-88.2'),
-                lit('PA'),
+                lit('PMX'),
                 ('POS_INT', '31'),
             ]))
             out, err = capsys.readouterr()
@@ -350,14 +350,14 @@ class TestParser(object):
 ''' == out
             assert err == ''
 
-    class TestSar(object):
-        def test_car_sar(self, parser):
+    class TestSmx(object):
+        def test_cmx_smx(self, parser):
             parser.parse(make_token_iter([
-                lit('CAR'),
+                lit('CMX'),
                 ('POS_INT', '31'),
                 ('POS_INT', '2'),
                 ('POS_INT', '3'),
-                lit('SAR'),
+                lit('SMX'),
                 ('POS_INT', '31'),
                 # Contents
                 ('REAL', '-13.4'),
@@ -374,11 +374,11 @@ class TestParser(object):
         def test_incorrect_number_of_arguments(self, parser):
             with raises(ArgumentError) as exc_info:
                 parser.parse(make_token_iter([
-                    lit('CAR'),
+                    lit('CMX'),
                     ('POS_INT', '31'),
                     ('POS_INT', '2'),
                     ('POS_INT', '3'),
-                    lit('SAR'),
+                    lit('SMX'),
                     ('POS_INT', '31'),
                     # Contents
                     ('REAL', '-13.4'),
@@ -394,7 +394,7 @@ class TestParser(object):
         def test_uninitialized(self, parser):
             with raises(UninitializedVariableError) as exc_info:
                 parser.parse(make_token_iter([
-                    lit('SAR'),
+                    lit('SMX'),
                     ('POS_INT', '7'),
                     # We don't know how large an uninitialized matrix is, so
                     # there isn't even a "right" amount of arguments we could
@@ -406,10 +406,10 @@ class TestParser(object):
                 ]))
             assert_exc_info_msg(
                 exc_info,
-                'Matrix 7 is not initialized. Please CAR first.')
+                'Matrix 7 is not initialized. Please CMX first.')
 
     class TestPde(object):
-        def test_car_sar_pde(self, parser, mock_apply_stencil):
+        def test_cmx_smx_pde(self, parser, mock_apply_stencil):
             mock_apply_stencil.return_value = sentinel.transformed_matrix
 
             stencil = open_matrix('stencil', 'ints')
@@ -441,7 +441,7 @@ class TestParser(object):
             with raises(UninitializedVariableError) as exc_info:
                 parser.parse(make_token_iter(tokens))
             assert_exc_info_msg(
-                exc_info, 'Matrix 10 is not initialized. Please CAR first.')
+                exc_info, 'Matrix 10 is not initialized. Please CMX first.')
 
             # Matrix should not have changed.
             assert parser.matrices[20] == matrix
@@ -459,7 +459,7 @@ class TestParser(object):
             with raises(UninitializedVariableError) as exc_info:
                 parser.parse(make_token_iter(tokens))
             assert_exc_info_msg(
-                exc_info, 'Matrix 20 is not initialized. Please CAR first.')
+                exc_info, 'Matrix 20 is not initialized. Please CMX first.')
 
             # Stencil should not have changed.
             assert parser.matrices[10] == stencil

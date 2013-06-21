@@ -36,14 +36,14 @@ class TestLexer(object):
         def test_add(self):
             assert_lex_token_list('ADD', [lit('ADD')])
 
-        def test_car(self):
-            assert_lex_token_list('CAR', [lit('CAR')])
+        def test_cmx(self):
+            assert_lex_token_list('CMX', [lit('CMX')])
 
-        def test_pa(self):
-            assert_lex_token_list('PA', [lit('PA')])
+        def test_pmx(self):
+            assert_lex_token_list('PMX', [lit('PMX')])
 
-        def test_sar(self):
-            assert_lex_token_list('SAR', [lit('SAR')])
+        def test_smx(self):
+            assert_lex_token_list('SMX', [lit('SMX')])
 
         def test_pde(self):
             assert_lex_token_list('PDE', [lit('PDE')])
@@ -79,13 +79,13 @@ PR 32
                 ('POS_INT', '32'),
             ])
 
-        def test_pr_car_add(self):
-            code = '''CAR 32 11 7
+        def test_pr_cmx_add(self):
+            code = '''CMX 32 11 7
 PR 11
 ADD 1 2.2
 '''
             assert_lex_token_list(code, [
-                lit('CAR'),
+                lit('CMX'),
                 ('POS_INT', '32'),
                 ('POS_INT', '11'),
                 ('POS_INT', '7'),
