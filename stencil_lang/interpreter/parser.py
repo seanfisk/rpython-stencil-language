@@ -11,7 +11,7 @@ from stencil_lang.structures import (
 )
 from stencil_lang.errors import (
     UninitializedVariableError,
-    InvalidArrayDimensionsError,
+    InvalidMatrixDimensionsError,
     ArgumentError,
     ParseError,
 )
@@ -27,16 +27,16 @@ class Parser(object):
         self._apply_stencil = apply_stencil
         self.registers = {}
         """Register bank for the interpreter."""
-        self.arrays = {}
-        """Array bank for the interpreter."""
+        self.matrices = {}
+        """Matrix bank for the interpreter."""
 
     _pg = ParserGenerator(tokens.keys(), cache_id=__name__)
 
-    def _safe_get_array(self, array_num):
+    def _safe_get_matrix(self, matrix_num):
         try:
-            return self.arrays[array_num]
+            return self.matrices[matrix_num]
         except KeyError:
-            raise UninitializedVariableError('Array', array_num)
+            raise UninitializedVariableError('Matrix', matrix_num)
 
     def _safe_get_register(self, register_num):
         try:
@@ -93,34 +93,34 @@ class Parser(object):
         rows = p[2].get_int()
         cols = p[3].get_int()
         if rows <= 0 or cols <= 0:
-            raise InvalidArrayDimensionsError(index, (rows, cols))
-        self.arrays[index] = Matrix(rows, cols, [])
+            raise InvalidMatrixDimensionsError(index, (rows, cols))
+        self.matrices[index] = Matrix(rows, cols, [])
 
     @_pg.production('pa : PA index')
     def _pa(self, p):
         index = p[1].get_int()
         # RPython does not honor most magic methods. Hence, just `print'
         # will work in tests but not when translated.
-        print self._safe_get_array(index).__str__()
+        print self._safe_get_matrix(index).__str__()
 
     @_pg.production('sar : SAR index number_list')
     def _sar(self, p):
         index = p[1].get_int()
         number_list = p[2].get_list()
-        array = self._safe_get_array(index)
-        num_required_args = array.rows * array.cols
+        matrix = self._safe_get_matrix(index)
+        num_required_args = matrix.rows * matrix.cols
         num_given_args = len(number_list)
         if num_given_args != num_required_args:
             raise ArgumentError(num_required_args, num_given_args)
-        array.contents = number_list
+        matrix.contents = number_list
 
     @_pg.production('pde : PDE index index')
     def _pde(self, p):
         stencil_index = p[1].get_int()
-        stencil = self._safe_get_array(stencil_index)
+        stencil = self._safe_get_matrix(stencil_index)
         matrix_index = p[2].get_int()
-        matrix = self._safe_get_array(matrix_index)
-        self.arrays[matrix_index] = self._apply_stencil(stencil, matrix)
+        matrix = self._safe_get_matrix(matrix_index)
+        self.matrices[matrix_index] = self._apply_stencil(stencil, matrix)
 
     # number_list must come first to parse the first number s first.
     @_pg.production('number_list : number_list number')

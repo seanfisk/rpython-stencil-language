@@ -104,7 +104,7 @@ class TestMatrix(object):
     class TestStr(object):
         def test_empty(self):
             assert (str(Matrix(4, 5, [])) ==
-                    'Unpopulated array of dimensions (4, 5)')
+                    'Unpopulated matrix of dimensions (4, 5)')
 
         def test_full_small(self):
             # Typical assert order reversed for a nicer multiline diff.

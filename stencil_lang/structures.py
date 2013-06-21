@@ -152,7 +152,7 @@ class Matrix(object):
     def __str__(self):
         # RPython does not honor this method, so please call it directly.
         if self.contents == []:
-            return 'Unpopulated array of dimensions (%d, %d)' % (
+            return 'Unpopulated matrix of dimensions (%d, %d)' % (
                 self.rows, self.cols)
         row_strs = []
 

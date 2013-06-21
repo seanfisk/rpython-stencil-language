@@ -13,7 +13,7 @@ class UninitializedVariableError(StencilLanguageError):
     """Raised when a variable is accessed without being initialized."""
     def __init__(self, type_, var_num):
         """:param type_: type of the variable accessed, \
-        valid values are ``'Register'`` or ``'Array'``
+        valid values are ``'Register'`` or ``'Matrix'``
         :type type_: :class:`str`
         :param var_num: the number of the variable accessed
         :type var_num: :class:`int`
@@ -24,7 +24,7 @@ class UninitializedVariableError(StencilLanguageError):
     def __str__(self):
         if self._type == 'Register':
             remedy = 'STO'
-        elif self._type == 'Array':
+        elif self._type == 'Matrix':
             remedy = 'CAR'
         else:
             raise TypeError('Invalid variable type: %s' % self._type)
@@ -32,20 +32,20 @@ class UninitializedVariableError(StencilLanguageError):
             self._type, self._var_num, remedy)
 
 
-class InvalidArrayDimensionsError(StencilLanguageError):
-    """Raised when an array is created with invalid dimensions."""
-    def __init__(self, array_num, dimensions):
-        """:param array_num: created array number
-        :type array_num: :class:`int`
-        :param dimensions: new dimensions of array
+class InvalidMatrixDimensionsError(StencilLanguageError):
+    """Raised when an matrix is created with invalid dimensions."""
+    def __init__(self, matrix_num, dimensions):
+        """:param matrix_num: created matrix number
+        :type matrix_num: :class:`int`
+        :param dimensions: new dimensions of matrix
         :type dimensions: :class:`tuple` of (:class:`int`, :class:`int`)
         """
-        self._array_num = array_num
+        self._matrix_num = matrix_num
         self._dimensions = dimensions
 
     def __str__(self):
-        return 'Invalid positive dimensions for array %d: %s' % (
-            self._array_num, self._dimensions)
+        return 'Invalid positive dimensions for matrix %d: %s' % (
+            self._matrix_num, self._dimensions)
 
 
 class ArgumentError(StencilLanguageError):
@@ -94,10 +94,10 @@ class InconsistentMatrixDimensions(StencilLanguageError):
 
 
 class InvalidStencilDimensionsError(StencilLanguageError):
-    """Raised when an array is attempted to be used as a stencil and its
+    """Raised when an matrix is attempted to be used as a stencil and its
     dimensions are not correct for that usage."""
     def __init__(self, dimensions):
-        """:param dimensions: new dimensions of array
+        """:param dimensions: new dimensions of matrix
         :type dimensions: :class:`list` of (:class:`int`, :class:`int`)
         """
         self._dimensions = dimensions

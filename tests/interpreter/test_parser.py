@@ -9,7 +9,7 @@ from stencil_lang.interpreter.stencil import apply_stencil
 from stencil_lang.structures import Matrix
 from stencil_lang.errors import (
     UninitializedVariableError,
-    InvalidArrayDimensionsError,
+    InvalidMatrixDimensionsError,
     ArgumentError,
     ParseError,
 )
@@ -211,9 +211,9 @@ class TestParser(object):
                 ('POS_INT', '33'),
                 ('POS_INT', '11'),
             ]))
-            assert parser.arrays[22] == Matrix(33, 11, [])
+            assert parser.matrices[22] == Matrix(33, 11, [])
 
-        def test_negative_array_index(self, parser):
+        def test_negative_matrix_index(self, parser):
             with raises(ParseError) as exc_info:
                 parser.parse(make_token_iter([
                     lit('CAR'),
@@ -234,7 +234,7 @@ class TestParser(object):
             assert_exc_info_msg(exc_info, "Unexpected `NEG_INT'")
 
         def test_zero_rows(self, parser):
-            with raises(InvalidArrayDimensionsError) as exc_info:
+            with raises(InvalidMatrixDimensionsError) as exc_info:
                 parser.parse(make_token_iter([
                     lit('CAR'),
                     ('POS_INT', '11'),
@@ -242,10 +242,10 @@ class TestParser(object):
                     ('POS_INT', '32'),
                 ]))
             assert_exc_info_msg(
-                exc_info, "Invalid positive dimensions for array 11: (0, 32)")
+                exc_info, "Invalid positive dimensions for matrix 11: (0, 32)")
 
         def test_zero_cols(self, parser):
-            with raises(InvalidArrayDimensionsError) as exc_info:
+            with raises(InvalidMatrixDimensionsError) as exc_info:
                 parser.parse(make_token_iter([
                     lit('CAR'),
                     ('POS_INT', '11'),
@@ -253,7 +253,7 @@ class TestParser(object):
                     ('POS_INT', '0'),
                 ]))
             assert_exc_info_msg(
-                exc_info, "Invalid positive dimensions for array 11: (7, 0)")
+                exc_info, "Invalid positive dimensions for matrix 11: (7, 0)")
 
     class TestPa(object):
         def test_empty(self, parser, capsys):
@@ -267,7 +267,7 @@ class TestParser(object):
             ]))
             out, err = capsys.readouterr()
             # Should call __str__ and add a newline.
-            assert out == 'Unpopulated array of dimensions (22, 78)\n'
+            assert out == 'Unpopulated matrix of dimensions (22, 78)\n'
             assert err == ''
 
         def test_uninitialized(self, parser, capsys):
@@ -278,13 +278,13 @@ class TestParser(object):
                 ]))
             assert_exc_info_msg(
                 exc_info,
-                'Array 20 is not initialized. Please CAR first.')
+                'Matrix 20 is not initialized. Please CAR first.')
             # Should not have printed anything.
             out, err = capsys.readouterr()
             assert out == ''
             assert err == ''
 
-        def test_pa_one_row_array(self, parser, capsys):
+        def test_pa_one_row_matrix(self, parser, capsys):
             parser.parse(make_token_iter([
                 lit('CAR'),
                 ('POS_INT', '22'),
@@ -303,7 +303,7 @@ class TestParser(object):
             assert out == '[[23.2 -42.11 54.001 7.11]]\n'
             assert err == ''
 
-        def test_pa_one_col_array(self, parser, capsys):
+        def test_pa_one_col_matrix(self, parser, capsys):
             parser.parse(make_token_iter([
                 lit('CAR'),
                 ('POS_INT', '22'),
@@ -367,7 +367,7 @@ class TestParser(object):
                 ('REAL', '34.8'),
                 ('REAL', '-88.2'),
             ]))
-            assert parser.arrays[31] == Matrix(2, 3, [
+            assert parser.matrices[31] == Matrix(2, 3, [
                 -13.4, 9876, 45.234, -42, 34.8, -88.2
             ])
 
@@ -396,7 +396,7 @@ class TestParser(object):
                 parser.parse(make_token_iter([
                     lit('SAR'),
                     ('POS_INT', '7'),
-                    # We don't know how large an uninitialized array is, so
+                    # We don't know how large an uninitialized matrix is, so
                     # there isn't even a "right" amount of arguments we could
                     # give here.
                     ('POS_INT', '1'),
@@ -406,7 +406,7 @@ class TestParser(object):
                 ]))
             assert_exc_info_msg(
                 exc_info,
-                'Array 7 is not initialized. Please CAR first.')
+                'Matrix 7 is not initialized. Please CAR first.')
 
     class TestPde(object):
         def test_car_sar_pde(self, parser, mock_apply_stencil):
@@ -424,9 +424,9 @@ class TestParser(object):
             parser.parse(make_token_iter(tokens))
 
             # Stencil should not have changed.
-            assert parser.arrays[10] == stencil
+            assert parser.matrices[10] == stencil
             # Matrix should have been swapped with the transformed matrix.
-            assert parser.arrays[20] == sentinel.transformed_matrix
+            assert parser.matrices[20] == sentinel.transformed_matrix
 
             mock_apply_stencil.assert_called_once_with(stencil, matrix)
 
@@ -441,10 +441,10 @@ class TestParser(object):
             with raises(UninitializedVariableError) as exc_info:
                 parser.parse(make_token_iter(tokens))
             assert_exc_info_msg(
-                exc_info, 'Array 10 is not initialized. Please CAR first.')
+                exc_info, 'Matrix 10 is not initialized. Please CAR first.')
 
             # Matrix should not have changed.
-            assert parser.arrays[20] == matrix
+            assert parser.matrices[20] == matrix
             # Should not have called apply_stencil.
             assert mock_apply_stencil.call_count == 0
 
@@ -459,9 +459,9 @@ class TestParser(object):
             with raises(UninitializedVariableError) as exc_info:
                 parser.parse(make_token_iter(tokens))
             assert_exc_info_msg(
-                exc_info, 'Array 20 is not initialized. Please CAR first.')
+                exc_info, 'Matrix 20 is not initialized. Please CAR first.')
 
             # Stencil should not have changed.
-            assert parser.arrays[10] == stencil
+            assert parser.matrices[10] == stencil
             # Should not have called apply_stencil.
             assert mock_apply_stencil.call_count == 0
