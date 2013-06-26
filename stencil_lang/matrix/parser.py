@@ -5,9 +5,8 @@ from rply import ParserGenerator
 
 from stencil_lang.matrix.tokens import TOKENS
 from stencil_lang.structures import (
-    IntBox,
     FloatBox,
-    ListBox,
+    FloatListBox,
     Matrix,
 )
 from stencil_lang.errors import (
@@ -30,7 +29,7 @@ class Parser(object):
             matrix = Matrix(0, 0, [])
         else:
             list_list_box = p[0]
-            list_of_lists = list_list_box.get_list()
+            list_of_lists = list_list_box.get_float_list()
             rows = len(list_of_lists)
             matrix = Matrix(rows, self._cols, [])
             for list_ in list_of_lists:
@@ -49,12 +48,13 @@ class Parser(object):
             # lines: lines row
             list_list_box = p[0]
             number_list_box = p[1]
-            list_list_box.get_list().append(number_list_box.get_list())
+            list_list_box.get_float_list().append(
+                number_list_box.get_float_list())
         else:
             # lines : line
             # lines : row
             number_list_box = p[0]
-            list_list_box = ListBox([number_list_box.get_list()])
+            list_list_box = FloatListBox([number_list_box.get_float_list()])
         return list_list_box
 
     @_pg.production('line : row newline')
@@ -65,7 +65,7 @@ class Parser(object):
     @_pg.production('row : number_list')
     def _row(self, p):
         number_list_box = p[0]
-        current_cols = len(number_list_box.get_list())
+        current_cols = len(number_list_box.get_float_list())
         if self._cols == -1:
             # The number of columns in the first row determines the number of
             # columns for all rows.
@@ -82,31 +82,19 @@ class Parser(object):
         if len(p) == 2:
             # number_list : number_list number
             number_list_box = p[0]
-            number = (p[1].get_int() if isinstance(p[1], IntBox)
-                      else p[1].get_float())
+            number = p[1].get_float()
             # TODO: Might have a problem with this mutating the list in the
             # future.
-            number_list_box.get_list().append(number)
+            number_list_box.get_float_list().append(number)
         else:
             # number_list : number
-            number = (p[0].get_int() if isinstance(p[0], IntBox)
-                      else p[0].get_float())
-            number_list_box = ListBox([number])
+            number = p[0].get_float()
+            number_list_box = FloatListBox([number])
         return number_list_box
 
-    @_pg.production('number : int')
-    @_pg.production('number : real')
+    @_pg.production('number : NUMBER')
     def _number(self, p):
-        return p[0]
-
-    @_pg.production('real : REAL')
-    def _real(self, p):
         return FloatBox(float(p[0].getstr()))
-
-    @_pg.production('int : POS_INT')
-    @_pg.production('int : NEG_INT')
-    def _int(self, p):
-        return IntBox(int(p[0].getstr()))
 
     @_pg.production('newline : NEWLINE')
     def _newline(self, p):

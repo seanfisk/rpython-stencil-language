@@ -2,8 +2,7 @@
 """
 from rply import LexerGenerator
 
-from stencil_lang.interpreter.tokens import TOKENS
-from stencil_lang.tokens import IGNORES
+from stencil_lang.interpreter.tokens import TOKENS, IGNORES
 
 lg = LexerGenerator()
 

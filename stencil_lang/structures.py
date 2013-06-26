@@ -6,86 +6,49 @@ from rpython.rlib.rarithmetic import r_uint
 
 # Thought these boxes do the same thing, they all need to exist because they
 # hold different types. In addition, a separate __init__ and accessors with
-# _different names_ need to exist for each box.
+# *different names* need to exist for each box.
 #
 # float and int initially might seem to be OK to put in the same
 # NumberBox. However, I think RPython just casts to float which presents some
 # problems, for example, in the error message string formatting.
-#
-# The following things don't work:
-#
-# * Creating a no-op class which just inherits from a ValueBox that has
-#   __init__ and get_value.
-# * Creating classes using metaprogramming deep-copied from ValueBox.
-# * Creating classes using metaprogramming deep-copied from BaseBox, then
-#   assigning __init__ and get_* methods to them.
 
 
 class ValueBox(BaseBox):
-    """Box created solely to add a repr."""
-    def __init__(self, value):
-        """Override this __init__ method with a method exactly like it (for
-        RPython's type checking.)
-
-        :param value: the number to store
-        :type value: :class:`object`
-        """
-        self._value = value
-
+    """Box created to add methods not used in RPython."""
     def __repr__(self):
         # RPython does not honor this method, so it is solely for testing.
         return '%s(%s)' % (type(self).__name__, self._value)
 
+    def __eq__(self, other):
+        # RPython does not honor this method, so it is solely for testing.
+        return self._value == other._value
 
-class IntBox(ValueBox):
-    """Store an integer."""
+    def __ne__(self, other):
+        return not (self == other)
+
+
+# We have to "make" a new function each time, otherwise RPython complains with
+# a union error.
+def _make_init():
     def __init__(self, value):
-        """:param value: the number to store
-        :type value: :class:`int`
-        """
         self._value = value
-
-    def get_int(self):
-        """Get the value from the box.
-
-        :return: the value
-        :rtype: :class:`int`
-        """
-        return self._value
+    return __init__
 
 
-class FloatBox(ValueBox):
-    """Store a floating-point real number."""
-    def __init__(self, value):
-        """:param value: the number to store
-        :type value: :class:`float`
-        """
-        self._value = value
-
-    def get_float(self):
-        """Get the value from the box.
-
-        :return: the value
-        :rtype: :class:`float`
-        """
-        return self._value
+# For tests.
+ValueBox.__init__ = _make_init()
 
 
-class ListBox(ValueBox):
-    """Store a list of numbers."""
-    def __init__(self, value):
-        """:param value: the value to store
-        :type value: :class:`list`
-        """
-        self._value = value
-
-    def get_list(self):
-        """Get the value from the box.
-
-        :return: the value
-        :rtype: :class:`list`
-        """
-        return self._value
+# Dynamically create boxes to take the monotony out of typing out each one by
+# hand. The contents are almost exactly the same.
+for box in ['int', 'float', 'float_list', 'bytecode_list']:
+    class_name = (
+        ''.join([type_.capitalize() for type_ in box.split('_')]) + 'Box')
+    getter_name = 'get_' + box
+    globals()[class_name] = type(class_name, (ValueBox, ), {
+        '__init__': _make_init(),
+        getter_name: lambda self: self._value,
+    })
 
 
 class Matrix(object):
@@ -96,7 +59,7 @@ class Matrix(object):
         :param cols: number of columns
         :type cols: :class:`int`
         :param init_contents: initial contents
-        :type init_contents: :class:`list`
+        :type init_contents: :class:`list` of :class:`float`
         """
         # I'd prefer to have a dimensions tuple, but RPython loses track of
         # whether they are positive or negative when inserted into a tuple.
@@ -111,6 +74,10 @@ class Matrix(object):
         # RPython does not honor this method, so it is mostly for testing.
         return (self.rows == other.rows and self.cols == other.cols and
                 self.contents == other.contents)
+
+    def __ne__(self, other):
+        # RPython does not honor this method, so it is mostly for testing.
+        return not(self == other)
 
     def _check_indices(self, requested_indices):
         if (not isinstance(requested_indices, list)
@@ -169,3 +136,40 @@ class Matrix(object):
             row_strs.append('[%s]' % nums_str)
 
         return '[%s]' % '\n '.join(row_strs)
+
+
+class Bytecode(BaseBox):
+    """Base bytecode class.
+    """
+    def eval(self, context):
+        """Evaluate this bytecode.
+
+        :param context: the execution context
+        :type context: :class:`stencil_lang.structures.Context`
+        """
+        raise NotImplementedError()
+
+    def __eq__(self, other):
+        # RPython does not honor this method, so it is mostly for testing.
+        return type(self) is type(other) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        # RPython does not honor this method, so it is mostly for testing.
+        return not (self == other)
+
+
+class Context(object):
+    """Execution context/environment for the interpreter.
+    """
+    def __init__(self, apply_stencil):
+        """:param apply_stencil: the apply_stencil function
+        :type apply_stencil: :class:`function`
+        """
+        self.registers = {}
+        """Register bank for the interpreter."""
+        self.matrices = {}
+        """Matrix bank for the interpreter."""
+        # Assigning this to the context is probably not the best thing to do,
+        # but it's the simplest way to dependency inject it.
+        self.apply_stencil = apply_stencil
+        """Apply stencil function to use."""

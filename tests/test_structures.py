@@ -2,7 +2,7 @@ from pprint import isreadable
 
 from pytest import fixture, raises
 
-from stencil_lang.structures import Matrix, ValueBox
+from stencil_lang.structures import Matrix, ValueBox, Bytecode
 
 from tests.helpers import assert_exc_info_msg
 
@@ -19,13 +19,15 @@ class TestValueBox(object):
 
 
 class TestMatrix(object):
-    class TestEquality(object):
+    class TestEqNe(object):
         def test_empty(self):
             assert Matrix(4, 5, []) == Matrix(4, 5, [])
 
         def test_full(self):
-            assert (Matrix(2, 3, [range(3), range(3, 6)]) ==
-                    Matrix(2, 3, [range(3), range(3, 6)]))
+            assert Matrix(2, 3, range(6)) == Matrix(2, 3, range(6))
+
+        def test_ne(self):
+            assert Matrix(2, 2, range(4)) != Matrix(2, 2, range(1, 5))
 
     class TestGetitem(object):
         def test_regular(self, mat):
@@ -96,10 +98,7 @@ class TestMatrix(object):
                 'Matrix(2, 3, [45, 26, -32.5, 11.1, 0.5, -0.2])')
 
         def test_readable(self):
-            assert isreadable(Matrix(2, 4, [
-                range(4),
-                range(5, 9),
-            ]))
+            assert isreadable(Matrix(2, 4, range(8)))
 
     class TestStr(object):
         def test_empty(self):
@@ -118,3 +117,36 @@ class TestMatrix(object):
  [-42.5 73.2000001]
  [11.1 -0.2]]''' == str(Matrix(4, 2, [
                 45, 26, -32.5, 11, -42.5, 73.2000001, 11.1, -0.2]))
+
+
+class Bytecode1(Bytecode):
+    def __init__(self, a, b):
+        self.a = a
+        self.b = b
+
+
+class Bytecode2(Bytecode):
+    def __init__(self, c, d):
+        self.c = c
+        self.d = d
+
+
+class Bytecode3(Bytecode):
+    def __init__(self, a, b):
+        self.a = a
+        self.b = b
+
+
+class TestBytecode:
+    class TestEqNe:
+        def test_should_equal(self):
+            assert Bytecode1(10, -20) == Bytecode1(10, -20)
+
+        def test_different_attr_values(self):
+            assert Bytecode1(0, 1) != Bytecode2(0, -1)
+
+        def test_different_attrs(self):
+            assert Bytecode1(30, 40) != Bytecode2(30, 40)
+
+        def test_same_attr_values_different_class(self):
+            assert Bytecode1(30, 40) != Bytecode3(30, 40)

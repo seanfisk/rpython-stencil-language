@@ -1,1 +1,1 @@
-STO abcd 45
+STO -20 45
