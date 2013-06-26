@@ -48,6 +48,9 @@ class TestLexer(object):
         def test_pde(self):
             assert_lex_token_list('PDE', [lit('PDE')])
 
+        def test_bne(self):
+            assert_lex_token_list('BNE', [lit('BNE')])
+
         def test_pos_int(self):
             assert_lex_token_list('20', [('POS_INT', '20')])
 

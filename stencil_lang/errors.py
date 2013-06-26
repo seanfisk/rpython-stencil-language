@@ -107,6 +107,31 @@ class InvalidStencilDimensionsError(StencilLanguageError):
             self._dimensions[0], self._dimensions[1])
 
 
+class InvalidBranchOffsetError(StencilLanguageError):
+    """Raised when an invalid branch offset is attempted."""
+    def __init__(self, offset, destination):
+        """:param offset: the invalid offset
+        :type offset: :class:`int`
+        :param destination: where the branch would have jumped
+        :type destination: :class:`int`
+        """
+        self._offset = offset
+        self._destination = destination
+
+    def __str__(self):
+        msg = 'Cannot branch '
+        if self._offset < 0:
+            msg += 'before beginning of program'
+        elif self._offset == 0:
+            msg += 'to current location'
+        else:
+            msg += 'past end of program'
+        msg += '. Invalid branch offset: %d' % (self._offset, )
+        if self._offset != 0:
+            msg += ' with destination: %d' % (self._destination, )
+        return msg
+
+
 # Get around limitations in RPython: type(error).__name__ does not work. See
 # stencil_lang/main.py for more information.
 #

@@ -6,6 +6,7 @@ from stencil_lang.errors import (
     UninitializedVariableError,
     InvalidMatrixDimensionsError,
     ArgumentError,
+    InvalidBranchOffsetError,
 )
 
 
@@ -145,6 +146,32 @@ class Pde(Bytecode):
         matrix_index = self._matrix_index
         matrix = _safe_get_matrix(context, matrix_index)
         context.matrices[matrix_index] = context.apply_stencil(stencil, matrix)
+
+
+class Bne(Bytecode):
+    """Branch-not-equal bytecode."""
+    def __init__(self, register_index, value, offset):
+        """:param register_index: index for register to check
+        :type register_index: :class:`int`
+        :param value: value with which to compare to register
+        :type value: :class:`int`
+        :param offset: instruction jump offset
+        :type offset: :class:`int`
+        """
+        self._register_index = register_index
+        self._value = value
+        self._offset = offset
+
+    def eval(self, context):
+        destination = context.pc + self._offset
+        if (self._offset == 0 or
+                destination >= context.program_length or
+                destination < 0):
+            raise InvalidBranchOffsetError(self._offset, destination)
+        register_value = _safe_get_register(context, self._register_index)
+        if register_value != self._value:
+            # Subtract one because the main loop increment will add another.
+            context.pc = destination - 1
 
 
 BYTECODES = [cls.__name__.upper() for cls in Bytecode.__subclasses__()]

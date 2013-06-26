@@ -9,6 +9,7 @@ from stencil_lang.errors import (
     UninitializedVariableError,
     InvalidMatrixDimensionsError,
     ArgumentError,
+    InvalidBranchOffsetError,
 )
 from stencil_lang.interpreter.evaluator import eval_
 
@@ -261,3 +262,75 @@ class TestPde(object):
         assert context.matrices[10] == stencil
         # Should not have called apply_stencil.
         assert mock_apply_stencil.call_count == 0
+
+
+class TestBne(object):
+    def test_branch_forward(self, context):
+        eval_([
+            Sto(0, 10),
+            Bne(0, 20, 2),
+            Sto(0, 20),
+            Sto(1, 30),
+        ], context)
+        assert context.registers[0] == 10
+        assert context.registers[1] == 30
+
+    def test_no_branch(self, context):
+        eval_([
+            Sto(0, 10),
+            Bne(0, 10, 2),
+            Sto(0, 20),
+            Sto(1, 30),
+        ], context)
+        assert context.registers[0] == 20
+        assert context.registers[1] == 30
+
+    def test_branch_back(self, context):
+        eval_([
+            Sto(0, 0),
+            Add(0, 1),
+            Bne(0, 10, -1),
+        ], context)
+        assert context.registers[0] == 10
+
+    def test_offset_zero(self, context):
+        with raises(InvalidBranchOffsetError) as exc_info:
+            eval_([
+                Sto(0, 10),
+                Bne(0, 20, 0),
+            ], context)
+        assert_exc_info_msg(
+            exc_info,
+            'Cannot branch to current location. Invalid branch offset: 0')
+
+    def test_offset_too_small(self, context):
+        with raises(InvalidBranchOffsetError) as exc_info:
+            eval_([
+                Sto(0, 10),
+                Bne(0, 20, -100),
+            ], context)
+        assert_exc_info_msg(
+            exc_info,
+            'Cannot branch before beginning of program. '
+            'Invalid branch offset: -100 with destination: -99')
+
+    def test_offset_too_large(self, context):
+        with raises(InvalidBranchOffsetError) as exc_info:
+            eval_([
+                Sto(0, 10),
+                Bne(0, 20, 100),
+            ], context)
+        assert_exc_info_msg(
+            exc_info,
+            'Cannot branch past end of program. '
+            'Invalid branch offset: 100 with destination: 101')
+
+    def test_uninitialized_register(self, context):
+        with raises(UninitializedVariableError) as exc_info:
+            eval_([
+                Bne(0, 10, 1),
+                Sto(0, 10),
+            ], context)
+        assert_exc_info_msg(
+            exc_info,
+            'Register 0 is not initialized. Please STO first.')

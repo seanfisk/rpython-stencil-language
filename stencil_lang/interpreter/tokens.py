@@ -9,6 +9,7 @@ LITERALS = [
     'PMX',
     'SMX',
     'PDE',
+    'BNE',
 ]
 """Language literals, i.e., the name is the same as the value."""
 

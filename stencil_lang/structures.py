@@ -165,6 +165,8 @@ class Context(object):
         """:param apply_stencil: the apply_stencil function
         :type apply_stencil: :class:`function`
         """
+        self.pc = 0
+        """Program counter."""
         self.registers = {}
         """Register bank for the interpreter."""
         self.matrices = {}
@@ -173,3 +175,5 @@ class Context(object):
         # but it's the simplest way to dependency inject it.
         self.apply_stencil = apply_stencil
         """Apply stencil function to use."""
+        self.program_length = -1
+        """Number of bytecodes in the program. Intended to be set elsewhere."""

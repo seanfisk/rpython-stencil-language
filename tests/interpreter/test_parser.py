@@ -192,8 +192,60 @@ class TestPde(object):
     def test_pde(self):
         parse(mkiter([
             lit('PDE'),
-            ('POS_INT', 10),
-            ('POS_INT', 20),
+            ('POS_INT', '10'),
+            ('POS_INT', '20'),
         ])) == [
             Pde(10, 20),
         ]
+
+
+class TestBne(object):
+    def test_bne_neg_offset(self):
+        parse(mkiter([
+            lit('BNE'),
+            ('POS_INT', '1'),
+            ('POS_INT', '72'),
+            ('NEG_INT', '-10'),
+        ])) == [
+            Bne(1, 72, -10),
+        ]
+
+    def test_bne_pos_offset(self):
+        parse(mkiter([
+            lit('BNE'),
+            ('POS_INT', '1'),
+            ('POS_INT', '72'),
+            ('POS_INT', '10'),
+        ])) == [
+            Bne(1, 72, 10),
+        ]
+
+    def test_bne_real_register_index(self):
+        with raises(ParseError) as exc_info:
+            parse(mkiter([
+                lit('BNE'),
+                ('REAL', '-21.2'),
+                ('POS_INT', '81'),
+                ('POS_INT', '32'),
+            ]))
+        assert_exc_info_msg(exc_info, "Unexpected `REAL'")
+
+    def test_bne_real_register_value(self):
+        with raises(ParseError) as exc_info:
+            parse(mkiter([
+                lit('BNE'),
+                ('POS_INT', '81'),
+                ('REAL', '-21.2'),
+                ('POS_INT', '32'),
+            ]))
+        assert_exc_info_msg(exc_info, "Unexpected `REAL'")
+
+    def test_bne_real_offset(self):
+        with raises(ParseError) as exc_info:
+            parse(mkiter([
+                lit('BNE'),
+                ('POS_INT', '81'),
+                ('POS_INT', '32'),
+                ('REAL', '-21.2'),
+            ]))
+        assert_exc_info_msg(exc_info, "Unexpected `REAL'")

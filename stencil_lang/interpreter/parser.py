@@ -61,6 +61,7 @@ class Parser(object):
     @_pg.production('stmt : pmx')
     @_pg.production('stmt : smx')
     @_pg.production('stmt : pde')
+    @_pg.production('stmt : bne')
     def _stmt(self, p):
         return p[0]
 
@@ -104,6 +105,13 @@ class Parser(object):
         stencil_index = p[1].get_int()
         matrix_index = p[2].get_int()
         return Pde(stencil_index, matrix_index)
+
+    @_pg.production('bne : BNE index int int')
+    def _bne(self, p):
+        register_index = p[1].get_int()
+        value = p[2].get_int()
+        offset = p[3].get_int()
+        return Bne(register_index, value, offset)
 
     # real_list must come first to parse the first real s first.
     @_pg.production('real_list : real_list real')
