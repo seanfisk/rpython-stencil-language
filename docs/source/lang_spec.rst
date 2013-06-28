@@ -7,9 +7,9 @@ Variables
 
 
 R\ :sub:`x`
-    Register with `x` from 0 to `maxint`
+    Register with `x` from 0 to `maxint`. Registers store integers.
 M\ :sub:`x`
-    Matrix of data with `x` from 0 to `maxint`
+    Matrix of data with `x` from 0 to `maxint`. Matrices store real numbers (as floats). Matrices must have odd dimensions.
 
 Opcodes
 =======
