@@ -90,7 +90,7 @@ def target(*args):
 
 
 def jitpolicy(driver):
-    """Define a JIT policy for PyPy.
+    """Just-in-time compilation policy for RPython.
 
     :param driver: jit driver
     :type driver: :class:`pypy.rlib.jit.JitDriver`

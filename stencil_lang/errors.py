@@ -1,6 +1,4 @@
-""":mod:`stencil_lang.errors` -- Various errors
-
-Currently contains only runtime errors.
+""":mod:`stencil_lang.errors` -- Interpreter errors
 """
 
 
@@ -94,8 +92,9 @@ class InconsistentMatrixDimensions(StencilLanguageError):
 
 
 class InvalidStencilDimensionsError(StencilLanguageError):
-    """Raised when an matrix is attempted to be used as a stencil and its
-    dimensions are not correct for that usage."""
+    """Raised when an matrix is used as a stencil and its dimensions are not
+    correct for that usage.
+    """
     def __init__(self, dimensions):
         """:param dimensions: new dimensions of matrix
         :type dimensions: :class:`list` of (:class:`int`, :class:`int`)
@@ -108,7 +107,7 @@ class InvalidStencilDimensionsError(StencilLanguageError):
 
 
 class InvalidBranchOffsetError(StencilLanguageError):
-    """Raised when an invalid branch offset is attempted."""
+    """Raised when an invalid branch offset is used."""
     def __init__(self, offset, destination):
         """:param offset: the invalid offset
         :type offset: :class:`int`

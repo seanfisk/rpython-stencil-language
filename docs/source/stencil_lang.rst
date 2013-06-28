@@ -1,8 +1,16 @@
-API Documentation
-=================
+stencil_lang Package
+====================
 
 :mod:`stencil_lang` Package
 ---------------------------
+
+:mod:`main` Module
+------------------
+
+.. automodule:: stencil_lang.main
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 :mod:`structures` Module
 ------------------------
@@ -12,19 +20,12 @@ API Documentation
     :undoc-members:
     :show-inheritance:
 
-:mod:`tokens` Module
---------------------
-
-.. automodule:: stencil_lang.tokens
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 :mod:`errors` Module
 --------------------
 
 .. automodule:: stencil_lang.errors
     :members:
+    :undoc-members:
     :show-inheritance:
 
 Subpackages

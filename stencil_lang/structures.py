@@ -45,9 +45,18 @@ for box in ['int', 'float', 'float_list', 'bytecode_list']:
     class_name = (
         ''.join([type_.capitalize() for type_ in box.split('_')]) + 'Box')
     getter_name = 'get_' + box
+    storage_type = 'list' if 'list' in box else box
+    init = _make_init()
+    init.__doc__ = """:param value: the value to store
+:type value: :class:`%s`
+""" % (storage_type, )
+    getter = lambda self: self._value
+    getter.__doc__ = """:return: the value
+:rtype: :class:`%s`
+""" % (storage_type, )
     globals()[class_name] = type(class_name, (ValueBox, ), {
-        '__init__': _make_init(),
-        getter_name: lambda self: self._value,
+        '__init__': init,
+        getter_name: getter,
     })
 
 
@@ -162,7 +171,8 @@ class Context(object):
     """Execution context/environment for the interpreter.
     """
     def __init__(self, apply_stencil):
-        """:param apply_stencil: the apply_stencil function
+        """:param apply_stencil: the \
+        :func:`stencil_lang.interpreter.stencil.apply_stencil` function
         :type apply_stencil: :class:`function`
         """
         self.pc = 0
@@ -174,6 +184,7 @@ class Context(object):
         # Assigning this to the context is probably not the best thing to do,
         # but it's the simplest way to dependency inject it.
         self.apply_stencil = apply_stencil
-        """Apply stencil function to use."""
+        """:func:`stencil_lang.interpreter.stencil.apply_stencil`
+        function to use."""
         self.program_length = -1
         """Number of bytecodes in the program. Intended to be set elsewhere."""
