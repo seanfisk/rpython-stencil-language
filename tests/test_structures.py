@@ -38,7 +38,7 @@ class TestMatrix(object):
                 mat.getitem([-1, 5])
             assert_exc_info_msg(
                 exc_info, 'Matrix indices must be non-negative. '
-                "Use `getitem_advanced' for wrap-around behavior.")
+                "Use `getitem_wraparound' for wrap-around behavior.")
 
         def test_list_length_one(self, mat):
             with raises(TypeError) as exc_info:
@@ -54,24 +54,24 @@ class TestMatrix(object):
                 exc_info,
                 'Matrix indices must be a list of integers of length 2')
 
-    class TestGetitemAdvanced(object):
+    class TestGetitemWraparound(object):
         def test_regular(self, mat):
-            assert mat.getitem_advanced([0, 2]) == 2
+            assert mat.getitem_wraparound([0, 2]) == 2
 
         def test_negative(self, mat):
-            assert mat.getitem_advanced([-2, 1]) == 5
+            assert mat.getitem_wraparound([-2, 1]) == 5
 
         def test_double_negative(self, mat):
-            assert mat.getitem_advanced([-1, -1]) == 11
+            assert mat.getitem_wraparound([-1, -1]) == 11
 
         def test_past_bounds(self, mat):
-            assert mat.getitem_advanced([4, 0]) == 4
+            assert mat.getitem_wraparound([4, 0]) == 4
 
         def test_double_past_bounds(self, mat):
-            assert mat.getitem_advanced([4, 4]) == 4
+            assert mat.getitem_wraparound([4, 4]) == 4
 
         def test_double_wraparound(self, mat):
-            assert mat.getitem_advanced([6, -6]) == 2
+            assert mat.getitem_wraparound([6, -6]) == 2
 
         def test_list_length_one(self, mat):
             with raises(TypeError) as exc_info:

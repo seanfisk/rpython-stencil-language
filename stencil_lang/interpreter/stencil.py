@@ -22,7 +22,7 @@ def _make_halo(matrix, num_row_layers, num_col_layers):
                   [])
     for r in xrange(-num_row_layers, matrix.rows + num_row_layers):
         for c in xrange(-num_col_layers, matrix.cols + num_col_layers):
-            halo.contents.append(matrix.getitem_advanced([r, c]))
+            halo.contents.append(matrix.getitem_wraparound([r, c]))
     return halo
 
 

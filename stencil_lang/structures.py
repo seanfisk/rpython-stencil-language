@@ -95,6 +95,14 @@ class Matrix(object):
                 'Matrix indices must be a list of integers of length 2')
 
     def getitem(self, requested_indices):
+        """Get an element of this matrix (no wraparound).
+
+        :param requested_indices: a list of indices representing the element \
+        to fetch
+        :type requested_indices: :class:`list`
+        :return: the requested element
+        :rtype: :class:`float`
+        """
         self._check_indices(requested_indices)
         dimensions = [self.rows, self.cols]
         flat_index = 0
@@ -105,13 +113,21 @@ class Matrix(object):
             if requested_index < 0:
                 raise ValueError(
                     'Matrix indices must be non-negative. '
-                    "Use `getitem_advanced' for wrap-around behavior.")
+                    "Use `getitem_wraparound' for wrap-around behavior.")
             flat_index += requested_index * significance
             significance *= dimensions[i]
 
         return self.contents[flat_index]
 
-    def getitem_advanced(self, requested_indices):
+    def getitem_wraparound(self, requested_indices):
+        """Get an element of this matrix with wraparound in effect.
+
+        :param requested_indices: a list of indices representing the element \
+        to fetch
+        :type requested_indices: :class:`list`
+        :return: the requested element
+        :rtype: :class:`float`
+        """
         self._check_indices(requested_indices)
         dimensions = [self.rows, self.cols]
         # Python follows the correct behavior of modulus (always returning
