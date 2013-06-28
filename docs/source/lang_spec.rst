@@ -17,19 +17,19 @@ Opcodes
 STO R\ :sub:`x` V
     Store value `V` in register R\ :sub:`x`
 ADD R\ :sub:`x` V
-    Add value `V` in register R\ :sub:`x`
-BNE R\ :sub:`x` V L
-    Branch to relative location `L` if register R\ :sub:`x` != `V`
+    Add value `V` to register R\ :sub:`x`
+PR R\ :sub:`x`
+    Print value in register R\ :sub:`x`
 CMX M\ :sub:`x` A B
-    Create the matrix M\ :sub:`x` with dimensions set to (`A`, `B`)
+    Create matrix M\ :sub:`x` with dimensions (`A`, `B`)
 SMX M\ :sub:`x` ...
     Set the values of M\ :sub:`x`, it requires `A` * `B` arguments
-PDE M\ :sub:`x` M\ :sub:`y`
-    Apply stencil M\ :sub:`x` to matrix M\ :sub:`x` (swap M\ :sub:`x` with copy when done)
-PR R\ :sub:`x`
-    Print register R\ :sub:`x`
 PMX M\ :sub:`x`
     Print matrix M\ :sub:`x`
+PDE M\ :sub:`x` M\ :sub:`y`
+    Apply stencil M\ :sub:`x` to M\ :sub:`y` and store the result in M\ :sub:`x`
+BNE R\ :sub:`x` V L
+    Branch to relative location `L` if R\ :sub:`x` != `V`
 
 Example
 =======
