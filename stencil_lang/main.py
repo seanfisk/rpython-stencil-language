@@ -80,7 +80,10 @@ URL: <%s>
 
 
 def main():
-    """Main for use with setuptools/distribute."""
+    """Main for use with setuptools/distribute.
+
+    NOT_RPYTHON
+    """
     raise SystemExit(_main(sys.argv))
 
 

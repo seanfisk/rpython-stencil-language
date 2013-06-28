@@ -30,6 +30,7 @@ class ValueBox(BaseBox):
 # We have to "make" a new function each time, otherwise RPython complains with
 # a union error.
 def _make_init():
+    """NOT_RPYTHON"""
     def __init__(self, value):
         self._value = value
     return __init__
