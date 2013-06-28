@@ -17,18 +17,6 @@ class Parser(object):
     """Source code parser and intepreter."""
     _pg = ParserGenerator(TOKENS.keys(), cache_id=__name__)
 
-    def _safe_get_matrix(self, matrix_num):
-        try:
-            return self.matrices[matrix_num]
-        except KeyError:
-            raise UninitializedVariableError('Matrix', matrix_num)
-
-    def _safe_get_register(self, register_num):
-        try:
-            return self.registers[register_num]
-        except KeyError:
-            raise UninitializedVariableError('Register', register_num)
-
     # Don't get taken in by illusions of any kind. For this class to translate,
     # all productions must return boxed values of some kind. If you try to
     # return raw values, translation will blow up.
