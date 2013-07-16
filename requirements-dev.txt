@@ -1,13 +1,27 @@
-# documentation
-Sphinx
+--requirement requirements.txt
 
-# task runner
-paver
-colorama
-pyfiglet
+# Documentation
+Sphinx==1.2b1
+Jinja2==2.7
+MarkupSafe==0.18
+Pygments==1.6
+docutils==0.10
 
-# testing
-flake8>=2.0.0
-mock>=1.0.1
-pytest>=2.3.0
-tox>=1.4
+# Task runner
+Paver==1.2.1
+colorama==0.2.5
+pyfiglet==0.6.1
+
+# Testing
+flake8==2.0
+mccabe==0.2.1
+pyflakes==0.7.3
+pep8==1.4.6
+
+mock==1.0.1
+
+pytest==2.3.5
+py==1.4.15
+
+tox==1.5.0
+virtualenv==1.9.1

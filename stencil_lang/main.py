@@ -45,7 +45,7 @@ def _main(argv):
 %s
 URL: <%s>
 ''' % (metadata.project, metadata.version,
-       '\n'.join(author_strings), metadata.url)
+            '\n'.join(author_strings), metadata.url)
         return 0
 
     if '-V' in argv or '--version' in argv:

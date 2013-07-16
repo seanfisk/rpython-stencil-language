@@ -86,9 +86,10 @@ class InconsistentMatrixDimensions(StencilLanguageError):
         self._current_cols = current_cols
 
     def __str__(self):
-        return ('Inconsistent columns in current row (%d) '
-                'from those in the first row (%d)') % (
-                    self._current_cols, self._first_row_cols)
+        return (
+            'Inconsistent columns in current row (%d) '
+            'from those in the first row (%d)') % (
+            self._current_cols, self._first_row_cols)
 
 
 class InvalidStencilDimensionsError(StencilLanguageError):
