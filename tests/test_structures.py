@@ -103,18 +103,33 @@ class TestMatrix(object):
 
     class TestStr(object):
         def test_empty(self):
-            assert (str(Matrix(4, 5, [])) ==
-                    'Unpopulated matrix of dimensions (4, 5)')
+            assert ('Unpopulated matrix of dimensions (4, 5)' ==
+                    str(Matrix(4, 5, [])))
 
         def test_full_small(self):
             # Typical assert order reversed for a nicer multiline diff.
-            assert '''[[0 1 2]
- [3 4 5]]''' == str(Matrix(2, 3, range(6)))
+            assert '''[[ 0 1 2 ]
+ [ 3 4 5 ]]''' == str(Matrix(2, 3, range(6)))
 
         def test_full_big(self):
             # Typical assert order reversed for a nicer multiline diff.
-            assert '''[[45 26]
- [-32.5 11]
- [-42.5 73.2000001]
- [11.1 -0.2]]''' == str(Matrix(4, 2, [
-                45, 26, -32.5, 11, -42.5, 73.2000001, 11.1, -0.2]))
+
+            # Output style is inspired by NumPy. However, this one is an
+            # evenly-spaced grid with points aligned. The integer part is right
+            # aligned and its width is equal to the width of the maximal
+            # integer part. The fractional part is aligned left and its width
+            # is equal to the width of the maximal fractional part.
+            assert (
+                '[[  12.3        7.800001   4          0.398    -11        ]\n'
+                ' [ -22.357     34.2      -11.11111   42.2        0.104    ]]'
+                == str(Matrix(
+                    2, 5, [
+                        12.3, 7.800001, 4, 0.398, -11,
+                        -22.357, 34.2, -11.11111, 42.2, 0.104])))
+
+    class TestAsPlainString(object):
+        # Make sure to not print trailing whitespace.
+        def test_small(self):
+            assert '''-456.4     52.2     -0.243
+  42       67      -99''' == Matrix(2, 3, [
+                -456.4, 52.2, -0.243, 42, 67, -99]).as_plain_string()

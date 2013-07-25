@@ -294,13 +294,13 @@ class TestParser(object):
                 ('POS_INT', '22'),
                 ('REAL', '23.2'),
                 ('REAL', '-42.11'),
-                ('REAL', '54.001'),
+                ('REAL', '54.2'),
                 ('REAL', '7.11'),
                 lit('PMX'),
                 ('POS_INT', '22'),
             ]))
             out, err = capsys.readouterr()
-            assert out == '[[23.2 -42.11 54.001 7.11]]\n'
+            assert out == '[[  23.2  -42.11  54.2    7.11 ]]\n'
             assert err == ''
 
         def test_pmx_one_col_matrix(self, parser, capsys):
@@ -313,16 +313,16 @@ class TestParser(object):
                 ('POS_INT', '22'),
                 ('REAL', '23.2'),
                 ('REAL', '-42.11'),
-                ('REAL', '54.001'),
+                ('REAL', '54.2'),
                 ('REAL', '7.11'),
                 lit('PMX'),
                 ('POS_INT', '22'),
             ]))
             out, err = capsys.readouterr()
-            assert '''[[23.2]
- [-42.11]
- [54.001]
- [7.11]]
+            assert '''[[  23.2  ]
+ [ -42.11 ]
+ [  54.2  ]
+ [   7.11 ]]
 ''' == out
             assert err == ''
 
@@ -345,8 +345,8 @@ class TestParser(object):
                 ('POS_INT', '31'),
             ]))
             out, err = capsys.readouterr()
-            assert '''[[-13.4 9876 45.234]
- [-42 34.8 -88.2]]
+            assert '''[[  -13.4   9876       45.234 ]
+ [  -42       34.8    -88.2   ]]
 ''' == out
             assert err == ''
 

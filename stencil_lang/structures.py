@@ -1,6 +1,8 @@
 """:mod:`stencil_lang.structures` --- Data structures
 """
 
+import math
+
 from rply.token import BaseBox
 from rpython.rlib.rarithmetic import r_uint
 
@@ -149,23 +151,52 @@ class Matrix(object):
         return '%s(%d, %d, %s)' % (
             type(self).__name__, self.rows, self.cols, self.contents)
 
-    def __str__(self):
-        # RPython does not honor this method, so please call it directly.
+    def _format_as_string(self, bracketed):
         if self.contents == []:
             return 'Unpopulated matrix of dimensions (%d, %d)' % (
                 self.rows, self.cols)
-        row_strs = []
+
+        part_strs_list = []
+        max_widths = [0, 0]
+        for real in self.contents:
+            # Fractional part is first, integer part second.
+            fpart, ipart = math.modf(real)
+            # Remove negative from fpart and strip the leading zero.
+            fpart_str = str(abs(fpart))[1:] if fpart != 0 else ''
+            ipart_str = '%.0f' % ipart
+            part_strs = [fpart_str, ipart_str]
+            max_widths = [
+                max(len(part_strs[i]), max_widths[i]) for i in xrange(2)]
+            part_strs_list.append(part_strs)
 
         # Tell RPython that these won't, in fact, be negative.
         rows = r_uint(self.rows)
         cols = r_uint(self.cols)
-        for r in xrange(rows):
-            this_row_index = r * cols
-            next_row_index = (r + 1) * cols
-            nums_str_list = [
-                str(num) for num in
-                self.contents[this_row_index:next_row_index]]
-            nums_str = ' '.join(nums_str_list)
-            row_strs.append('[%s]' % nums_str)
+        lines = [
+            ' '.join([
+                # Fractional part is first, integer part second.
+                part_strs[1].rjust(max_widths[1]) +
+                part_strs[0].ljust(max_widths[0])
+                for part_strs
+                in part_strs_list[r * cols:(r + 1) * cols]])
+            for r
+            in xrange(rows)]
 
-        return '[%s]' % '\n '.join(row_strs)
+        if bracketed:
+            lines = [' [ %s ]' % line for line in lines]
+            lines[0] = '[' + lines[0][1:]
+            lines[-1] = lines[-1] + ']'
+        else:
+            lines = [line.rstrip() for line in lines]
+        return '\n'.join(lines)
+
+    def as_plain_string(self):
+        return self._format_as_string(bracketed=False)
+
+    def as_bracketed_string(self):
+        return self._format_as_string(bracketed=True)
+
+    def __str__(self):
+        # RPython does not honor this method, so please call matrix.__str__()
+        # or matrix.as_bracketed_string() directly.
+        return self.as_bracketed_string()
