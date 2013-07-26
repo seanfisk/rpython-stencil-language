@@ -185,9 +185,12 @@ def translate(options):
     executable = 'rpython'
     try:
         cpus = get_num_cpus()
-        # TODO: Will probably have to modify this to find RPython libraries.
-        env = {'PYTHONPATH': '.'}
-        env.update(os.environ)
+        env = os.environ
+        import rply
+        env['PYTHONPATH'] = ':'.join([
+            '.',
+            os.getenv('PYTHONPATH', ''),
+            os.path.dirname(os.path.dirname(rply.__file__))])
         cmd_flags = ['--make-jobs', str(cpus)]
         if 'view' in options.translate:
             cmd_flags += ['--annotate', '--view']
