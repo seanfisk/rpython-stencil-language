@@ -6,6 +6,8 @@ import math
 from rply.token import BaseBox
 from rpython.rlib.rarithmetic import r_uint
 
+from stencil_lang.utils import rjust, ljust
+
 # Thought these boxes do the same thing, they all need to exist because they
 # hold different types. In addition, a separate __init__ and accessors with
 # _different names_ need to exist for each box.
@@ -163,7 +165,11 @@ class Matrix(object):
             fpart, ipart = math.modf(real)
             # Remove negative from fpart and strip the leading zero.
             fpart_str = str(abs(fpart))[1:] if fpart != 0 else ''
-            ipart_str = '%.0f' % ipart
+            # Cast to integer to strip off the fractional part of THIS number
+            # (which is just 0), then format. Probably not the cleanest way,
+            # but it works. This is done because RPython doesn't suport '%.0f'.
+            sign_str = '-' if real < 0 else ''
+            ipart_str = sign_str + str(int(abs(ipart)))
             part_strs = [fpart_str, ipart_str]
             max_widths = [
                 max(len(part_strs[i]), max_widths[i]) for i in xrange(2)]
@@ -175,8 +181,8 @@ class Matrix(object):
         lines = [
             ' '.join([
                 # Fractional part is first, integer part second.
-                part_strs[1].rjust(max_widths[1]) +
-                part_strs[0].ljust(max_widths[0])
+                rjust(part_strs[1], max_widths[1]) +
+                ljust(part_strs[0], max_widths[0])
                 for part_strs
                 in part_strs_list[r * cols:(r + 1) * cols]])
             for r
