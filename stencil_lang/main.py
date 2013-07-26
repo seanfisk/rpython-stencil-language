@@ -45,7 +45,7 @@ def _main(argv):
 %s
 URL: <%s>
 ''' % (metadata.project, metadata.version,
-       '\n'.join(author_strings), metadata.url)
+            '\n'.join(author_strings), metadata.url)
         return 0
 
     if '-V' in argv or '--version' in argv:
@@ -80,7 +80,10 @@ URL: <%s>
 
 
 def main():
-    """Main for use with setuptools/distribute."""
+    """Main for use with setuptools/distribute.
+
+    NOT_RPYTHON
+    """
     raise SystemExit(_main(sys.argv))
 
 
@@ -90,7 +93,7 @@ def target(*args):
 
 
 def jitpolicy(driver):
-    """Define a JIT policy for PyPy.
+    """Just-in-time compilation policy for RPython.
 
     :param driver: jit driver
     :type driver: :class:`pypy.rlib.jit.JitDriver`

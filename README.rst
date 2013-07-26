@@ -4,6 +4,9 @@
  RPython Stencil Language Interpreter
 ======================================
 
+.. image:: https://travis-ci.org/seanfisk/rpython-stencil-language.png
+   :target: https://travis-ci.org/seanfisk/rpython-stencil-language
+
 A simple experimental programming language implementing `finite difference`_ using stencils_.
 
 .. _finite difference: http://en.wikipedia.org/wiki/Finite_difference

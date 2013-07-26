@@ -25,6 +25,30 @@ interpreter Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`evaluator` Module
+-----------------------
+
+.. automodule:: stencil_lang.interpreter.evaluator
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`bytecodes` Module
+-----------------------
+
+.. automodule:: stencil_lang.interpreter.bytecodes
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`stencil` Module
+---------------------
+
+.. automodule:: stencil_lang.interpreter.stencil
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`tokens` Module
 --------------------
 
@@ -32,4 +56,3 @@ interpreter Package
     :members:
     :undoc-members:
     :show-inheritance:
-

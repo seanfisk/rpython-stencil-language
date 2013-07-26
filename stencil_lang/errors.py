@@ -1,6 +1,4 @@
-""":mod:`stencil_lang.errors` -- Various errors
-
-Currently contains only runtime errors.
+""":mod:`stencil_lang.errors` -- Interpreter errors
 """
 
 
@@ -88,14 +86,16 @@ class InconsistentMatrixDimensions(StencilLanguageError):
         self._current_cols = current_cols
 
     def __str__(self):
-        return ('Inconsistent columns in current row (%d) '
-                'from those in the first row (%d)') % (
-                    self._current_cols, self._first_row_cols)
+        return (
+            'Inconsistent columns in current row (%d) '
+            'from those in the first row (%d)') % (
+                self._current_cols, self._first_row_cols)
 
 
 class InvalidStencilDimensionsError(StencilLanguageError):
-    """Raised when an matrix is attempted to be used as a stencil and its
-    dimensions are not correct for that usage."""
+    """Raised when an matrix is used as a stencil and its dimensions are not
+    correct for that usage.
+    """
     def __init__(self, dimensions):
         """:param dimensions: new dimensions of matrix
         :type dimensions: :class:`list` of (:class:`int`, :class:`int`)
@@ -105,6 +105,31 @@ class InvalidStencilDimensionsError(StencilLanguageError):
     def __str__(self):
         return 'Invalid odd dimensions for stencil: (%d, %d)' % (
             self._dimensions[0], self._dimensions[1])
+
+
+class InvalidBranchOffsetError(StencilLanguageError):
+    """Raised when an invalid branch offset is used."""
+    def __init__(self, offset, destination):
+        """:param offset: the invalid offset
+        :type offset: :class:`int`
+        :param destination: where the branch would have jumped
+        :type destination: :class:`int`
+        """
+        self._offset = offset
+        self._destination = destination
+
+    def __str__(self):
+        msg = 'Cannot branch '
+        if self._offset < 0:
+            msg += 'before beginning of program'
+        elif self._offset == 0:
+            msg += 'to current location'
+        else:
+            msg += 'past end of program'
+        msg += '. Invalid branch offset: %d' % (self._offset, )
+        if self._offset != 0:
+            msg += ' with destination: %d' % (self._destination, )
+        return msg
 
 
 # Get around limitations in RPython: type(error).__name__ does not work. See

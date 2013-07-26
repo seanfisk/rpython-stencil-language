@@ -1,0 +1,16 @@
+language: python
+python: 2.7
+env:
+  - TOXENV=py27
+  - TOXENV=pypy
+  - TOXENV=docs
+  # Travis-CI documentation says that before_install happens before cd-ing to the clone directory. However, it actually happens afterward.
+install:
+  # Unabashedly (and unsurprisingly) mostly stolen from here:
+  # <https://github.com/alex/rply/blob/master/.travis.yml>
+  #
+  # Prevent PyPy's vendorized version of pytest from shadowing my newer one that tox installs by only extracting the rpython directory.
+  - wget https://bitbucket.org/pypy/pypy/downloads/pypy-2.0.2-src.tar.bz2 --output-document - | tar --extract --bzip2 --directory=.. pypy-2.0.2-src/rpython
+  - pip install tox
+script:
+  - PYTHONPATH="$PYTHONPATH:../pypy-2.0.2-src" tox

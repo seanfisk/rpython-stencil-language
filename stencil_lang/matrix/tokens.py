@@ -1,11 +1,12 @@
 """:mod:`stencil_lang.matrix.tokens` -- Tokens for lexing and parsing
 """
 
-from stencil_lang.tokens import NUMBERS
-
-TOKENS = NUMBERS.copy()
+TOKENS = {
+    # Read integers and reals the same way.
+    'NUMBER': r'-?\d+(?:\.\d*)?',
+    'NEWLINE':  r'\n',
+}
 """Language tokens."""
-TOKENS['NEWLINE'] = r'\n'
 
 IGNORES = [
     # Ignore all spaces besides the newline character. Jacked this from here

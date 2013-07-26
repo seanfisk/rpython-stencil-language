@@ -3,56 +3,44 @@
 from rply import ParserGenerator
 
 from stencil_lang.interpreter.tokens import TOKENS
+from stencil_lang.interpreter.bytecodes import *  # NOQA
 from stencil_lang.structures import (
     IntBox,
     FloatBox,
-    ListBox,
-    Matrix,
+    FloatListBox,
+    BytecodeListBox,
 )
-from stencil_lang.errors import (
-    UninitializedVariableError,
-    InvalidMatrixDimensionsError,
-    ArgumentError,
-    ParseError,
-)
-from stencil_lang.interpreter.stencil import apply_stencil
+from stencil_lang.errors import ParseError
 
 
 class Parser(object):
     """Source code parser and intepreter."""
-    def __init__(self, apply_stencil):
-        """:param apply_stencil: the apply_stencil function
-        :type apply_stencil: :class:`function`
-        """
-        self._apply_stencil = apply_stencil
-        self.registers = {}
-        """Register bank for the interpreter."""
-        self.matrices = {}
-        """Matrix bank for the interpreter."""
-
     _pg = ParserGenerator(TOKENS.keys(), cache_id=__name__)
 
-    def _safe_get_matrix(self, matrix_num):
-        try:
-            return self.matrices[matrix_num]
-        except KeyError:
-            raise UninitializedVariableError('Matrix', matrix_num)
-
-    def _safe_get_register(self, register_num):
-        try:
-            return self.registers[register_num]
-        except KeyError:
-            raise UninitializedVariableError('Register', register_num)
+    # Don't get taken in by illusions of any kind. For this class to translate,
+    # all productions must return boxed values of some kind. If you try to
+    # return raw values, translation will blow up.
 
     @_pg.production('main : stmt_list')
     def _main(self, p):
-        pass
+        return p[0]
 
+    @_pg.production('stmt_list : stmt_list stmt')
     # A valid program can be just one statement.
     @_pg.production('stmt_list : stmt')
-    @_pg.production('stmt_list : stmt stmt_list')
     def _stmt_list(self, p):
-        pass
+        if len(p) == 2:
+            # stmt_list : stmt_list stmt
+            stmt_list_box = p[0]
+            stmt_bytecode_box = p[1]
+            # TODO: Might have a problem with this mutating the list in the
+            # future.
+            stmt_list_box.get_bytecode_list().append(stmt_bytecode_box)
+        else:
+            # stmt_list : stmt
+            stmt = p[0]
+            stmt_list_box = BytecodeListBox([stmt])
+        return stmt_list_box
 
     @_pg.production('stmt : sto')
     @_pg.production('stmt : pr')
@@ -61,99 +49,91 @@ class Parser(object):
     @_pg.production('stmt : pmx')
     @_pg.production('stmt : smx')
     @_pg.production('stmt : pde')
+    @_pg.production('stmt : bne')
     def _stmt(self, p):
-        pass
+        return p[0]
 
-    @_pg.production('sto : STO index number')
+    @_pg.production('sto : STO index int')
     def _sto(self, p):
         index = p[1].get_int()
-        number = (p[2].get_int() if isinstance(p[2], IntBox)
-                  else p[2].get_float())
-        self.registers[index] = number
+        integer = p[2].get_int()
+        return Sto(index, integer)
 
     @_pg.production('pr : PR index')
     def _pr(self, p):
         index = p[1].get_int()
-        print self._safe_get_register(index)
+        return Pr(index)
 
-    @_pg.production('add : ADD index number')
+    @_pg.production('add : ADD index int')
     def _add(self, p):
         index = p[1].get_int()
-        # number = p[2].get_number()
-        number = (p[2].get_int() if isinstance(p[2], IntBox)
-                  else p[2].get_float())
-        try:
-            self.registers[index] += number
-        except KeyError:
-            raise UninitializedVariableError('Register', index)
+        integer = p[2].get_int()
+        return Add(index, integer)
 
-    @_pg.production('cmx : CMX index pos_int pos_int')
+    @_pg.production('cmx : CMX index nonneg_int nonneg_int')
     def _cmx(self, p):
         index = p[1].get_int()
         rows = p[2].get_int()
         cols = p[3].get_int()
-        if rows <= 0 or cols <= 0:
-            raise InvalidMatrixDimensionsError(index, (rows, cols))
-        self.matrices[index] = Matrix(rows, cols, [])
+        return Cmx(index, rows, cols)
 
     @_pg.production('pmx : PMX index')
     def _pmx(self, p):
         index = p[1].get_int()
-        # RPython does not honor most magic methods. Hence, just `print'
-        # will work in tests but not when translated.
-        print self._safe_get_matrix(index).__str__()
+        return Pmx(index)
 
-    @_pg.production('smx : SMX index number_list')
+    @_pg.production('smx : SMX index real_list')
     def _smx(self, p):
         index = p[1].get_int()
-        number_list = p[2].get_list()
-        matrix = self._safe_get_matrix(index)
-        num_required_args = matrix.rows * matrix.cols
-        num_given_args = len(number_list)
-        if num_given_args != num_required_args:
-            raise ArgumentError(num_required_args, num_given_args)
-        matrix.contents = number_list
+        real_list = p[2].get_float_list()
+        return Smx(index, real_list)
 
     @_pg.production('pde : PDE index index')
     def _pde(self, p):
         stencil_index = p[1].get_int()
-        stencil = self._safe_get_matrix(stencil_index)
         matrix_index = p[2].get_int()
-        matrix = self._safe_get_matrix(matrix_index)
-        self.matrices[matrix_index] = self._apply_stencil(stencil, matrix)
+        return Pde(stencil_index, matrix_index)
 
-    # number_list must come first to parse the first number s first.
-    @_pg.production('number_list : number_list number')
-    @_pg.production('number_list : number')
-    def _number_list(self, p):
+    @_pg.production('bne : BNE index int int')
+    def _bne(self, p):
+        register_index = p[1].get_int()
+        value = p[2].get_int()
+        offset = p[3].get_int()
+        return Bne(register_index, value, offset)
+
+    # real_list must come first to parse the first real s first.
+    @_pg.production('real_list : real_list real')
+    @_pg.production('real_list : real')
+    def _real_list(self, p):
         if len(p) == 2:
-            # number_list : number_list number
-            number_list_box = p[0]
-            number = (p[1].get_int() if isinstance(p[1], IntBox)
-                      else p[1].get_float())
+            # real_list : real_list real
+            real_list_box = p[0]
+            real = p[1].get_float()
             # TODO: Might have a problem with this mutating the list in the
             # future.
-            number_list_box.get_list().append(number)
-        else:
-            # number_list : number
-            number = (p[0].get_int() if isinstance(p[0], IntBox)
-                      else p[0].get_float())
-            number_list_box = ListBox([number])
-        return number_list_box
 
-    @_pg.production('number : int')
-    @_pg.production('number : real')
-    def _number(self, p):
-        return p[0]
+            # RPython likes this assigned to a variable before appending.
+            real_list = real_list_box.get_float_list()
+            real_list.append(real)
+            return real_list_box
+        # RPython likes two separate return statements.
 
+        # real_list : real
+        real = p[0].get_float()
+        real_list_box = FloatListBox([real])
+        return real_list_box
+
+    @_pg.production('real : POS_INT')
+    @_pg.production('real : NEG_INT')
     @_pg.production('real : REAL')
     def _real(self, p):
+        # Convert integers and reals to float representation.
         return FloatBox(float(p[0].getstr()))
 
     @_pg.production('int : POS_INT')
     @_pg.production('int : NEG_INT')
     @_pg.production('index : POS_INT')
-    @_pg.production('pos_int : POS_INT')
+    @_pg.production('nonneg_int : POS_INT')
     def _int(self, p):
         return IntBox(int(p[0].getstr()))
 
@@ -171,10 +151,11 @@ class Parser(object):
 
         :param text: text to parse
         :type text: :class:`str`
-        :return: the final value parsed
-        :rtype: :class:`rply.token.BaseBox`
+        :return: the parsed bytecodes
+        :rtype: :class:`list` of :class:`stencil_lang.structures.Bytecode`
         """
-        return self._parser.parse(text, state=self)
+        # _parser.parse returns a boxed list of bytecodes.
+        return self._parser.parse(text, state=self).get_bytecode_list()
 
 
 def parse(text):
@@ -182,7 +163,7 @@ def parse(text):
 
     :param text: text to parse
     :type text: :class:`str`
-    :return: the final value parsed
-    :rtype: :class:`rply.token.BaseBox`
+    :return: the parsed bytecodes
+    :rtype: :class:`list` of :class:`stencil_lang.structures.Bytecode`
     """
-    return Parser(apply_stencil).parse(text)
+    return Parser().parse(text)
