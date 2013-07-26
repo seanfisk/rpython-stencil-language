@@ -89,7 +89,7 @@ class InconsistentMatrixDimensions(StencilLanguageError):
         return (
             'Inconsistent columns in current row (%d) '
             'from those in the first row (%d)') % (
-                self._current_cols, self._first_row_cols)
+            self._current_cols, self._first_row_cols)
 
 
 class InvalidStencilDimensionsError(StencilLanguageError):
