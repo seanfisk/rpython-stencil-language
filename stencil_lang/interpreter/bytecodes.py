@@ -7,7 +7,9 @@ from stencil_lang.errors import (
     InvalidMatrixDimensionsError,
     ArgumentError,
     InvalidBranchOffsetError,
+    MatrixDimensionMismatchError,
 )
+from stencil_lang.matrix import from_file
 
 
 def _safe_get_matrix(context, matrix_num):
@@ -108,7 +110,7 @@ class Pmx(Bytecode):
 
 
 class Smx(Bytecode):
-    """Set matrix bytecode"""
+    """Set matrix bytecode."""
     def __init__(self, index, real_list):
         """:param index: matrix index
         :type index: :class:`int`
@@ -127,6 +129,31 @@ class Smx(Bytecode):
         if num_given_args != num_required_args:
             raise ArgumentError(num_required_args, num_given_args)
         matrix.contents = real_list
+
+
+class Smxf(Bytecode):
+    """Set matrix from file bytecode."""
+    def __init__(self, index, filename):
+        """:param index: matrix index
+        :type index: :class:`int`
+        :param filename: file containing contents of matrix
+        :type filename: :class:`str`
+        """
+        self._index = index
+        self._filename = filename
+
+    def eval(self, context):
+        index = self._index
+        filename = self._filename
+        matrix = _safe_get_matrix(context, index)
+        matrix_from_file = from_file(filename)
+        if (matrix.rows != matrix_from_file.rows or
+                matrix.cols != matrix_from_file.cols):
+            raise MatrixDimensionMismatchError(
+                index,
+                (matrix.rows, matrix.cols),
+                (matrix_from_file.rows, matrix_from_file.cols))
+        matrix.contents = matrix_from_file.contents
 
 
 class Pde(Bytecode):

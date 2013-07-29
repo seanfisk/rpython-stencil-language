@@ -45,6 +45,9 @@ class TestLexer(object):
         def test_smx(self):
             assert_lex_token_list('SMX', [lit('SMX')])
 
+        def test_smxf(self):
+            assert_lex_token_list('SMXF', [lit('SMXF')])
+
         def test_pde(self):
             assert_lex_token_list('PDE', [lit('PDE')])
 
@@ -62,6 +65,14 @@ class TestLexer(object):
 
         def test_neg_int_leading_zero(self):
             assert_lex_token_list('-078', [('NEG_INT', '-078')])
+
+        def test_filename_without_spaces(self):
+            assert_lex_token_list('"file/name/withoutspaces"',
+                                  [('FILENAME', '"file/name/withoutspaces"')])
+
+        def test_filename_with_spaces(self):
+            assert_lex_token_list('"file/name/with spaces"',
+                                  [('FILENAME', '"file/name/with spaces"')])
 
         def test_sto_pr(self):
             code = '''STO 1 32.3
@@ -129,3 +140,13 @@ ADD 1 2.2
             for _ in xrange(5):
                 with raises(LexingError):
                     next(stream)
+
+        def test_unclosed_file_name(self):
+            stream = lex('"')
+            with raises(LexingError):
+                next(stream)
+
+        def test_empty_file_name(self):
+            stream = lex('""')
+            with raises(LexingError):
+                next(stream)

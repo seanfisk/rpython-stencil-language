@@ -188,6 +188,22 @@ class TestSmx(object):
         ]
 
 
+class TestSmxf(object):
+    def test_cmx_smx(self):
+        parse(mkiter([
+            lit('CMX'),
+            ('POS_INT', '31'),
+            ('POS_INT', '3'),
+            ('POS_INT', '3'),
+            lit('SMXF'),
+            ('POS_INT', '31'),
+            ('FILENAME', '"a/random/file name"')
+        ])) == [
+            Cmx(31, 2, 3),
+            Smxf(31, 'a/random/file name'),
+        ]
+
+
 class TestPde(object):
     def test_pde(self):
         parse(mkiter([

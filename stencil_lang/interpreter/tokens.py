@@ -7,6 +7,7 @@ LITERALS = [
     'ADD',
     'CMX',
     'PMX',
+    'SMXF',
     'SMX',
     'PDE',
     'BNE',
@@ -42,10 +43,15 @@ TOKENS = {
     # -.4
     #
     'REAL': r'-?\d+\.\d*',
+    # A quoted filename.
+    'FILENAME': r'"[^"]+"',
 }
 """Language tokens for lexing and parsing."""
 
 # Update tokens with literals. Beware that any token duplicated in tokens and
 # literals will be overwritten with the value from literals.
 for literal in LITERALS:
-    TOKENS[literal] = literal
+    # It is important to make sure that the literals are "words", e.g.,
+    # surrounded by spaces. This is especially important for SMX and SMXF,
+    # because the lexer will find SMX before SMXF.
+    TOKENS[literal] = r'\b%s\b' % literal

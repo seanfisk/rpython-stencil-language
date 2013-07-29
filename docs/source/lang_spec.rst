@@ -24,6 +24,8 @@ CMX M\ :sub:`x` A B
     Create matrix M\ :sub:`x` with dimensions (`A`, `B`)
 SMX M\ :sub:`x` ...
     Set the values of M\ :sub:`x`, it requires `A` * `B` arguments
+SMX M\ :sub:`x` FILENAME
+    Set the values of M\ :sub:`x` by reading the matrix in `FILENAME`.
 PMX M\ :sub:`x`
     Print matrix M\ :sub:`x`
 PDE M\ :sub:`x` M\ :sub:`y`

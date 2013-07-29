@@ -10,10 +10,11 @@ from stencil_lang.errors import (
     InvalidMatrixDimensionsError,
     ArgumentError,
     InvalidBranchOffsetError,
+    MatrixDimensionMismatchError,
 )
 from stencil_lang.interpreter.evaluator import eval_
 
-from tests.helpers import assert_exc_info_msg, open_matrix
+from tests.helpers import assert_exc_info_msg, open_matrix, fixture_path
 
 
 def create_matrix_bytecodes(matrix, matrix_num):
@@ -211,6 +212,41 @@ class TestSmx(object):
                 # We don't know how large an uninitialized matrix is, so there
                 # isn't even a "right" amount of arguments we could give here.
                 Smx(7, [1, 10, 71, -32]),
+            ], context)
+        assert_exc_info_msg(
+            exc_info,
+            'Matrix 7 is not initialized. Please CMX first.')
+
+
+class TestSmxf(object):
+    def test_cmx_smxf(self, context):
+        eval_([
+            Cmx(31, 3, 3),
+            Smxf(31, fixture_path('stencil/ints'))
+        ], context)
+        assert context.matrices[31] == Matrix(3, 3, [
+            1, 1, 1,
+            1, 2, 1,
+            1, 1, 1,
+        ])
+
+    def test_dimension_mismatch(self, context):
+        with raises(MatrixDimensionMismatchError) as exc_info:
+            eval_([
+                Cmx(31, 2, 3),
+                Smxf(31, fixture_path('stencil/ints'))
+            ], context)
+        assert_exc_info_msg(
+            exc_info,
+            'Dimensions of assignee matrix 31 (2, 3) '
+            'do not match assigned matrix (3, 3)')
+
+    def test_uninitialized(self, context):
+        with raises(UninitializedVariableError) as exc_info:
+            eval_([
+                # We don't know how large an uninitialized matrix is, so there
+                # isn't even a "right" amount of arguments we could give here.
+                Smxf(7, fixture_path('stencil/ints'))
             ], context)
         assert_exc_info_msg(
             exc_info,

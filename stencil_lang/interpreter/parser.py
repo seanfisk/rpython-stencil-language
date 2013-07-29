@@ -48,6 +48,7 @@ class Parser(object):
     @_pg.production('stmt : cmx')
     @_pg.production('stmt : pmx')
     @_pg.production('stmt : smx')
+    @_pg.production('stmt : smxf')
     @_pg.production('stmt : pde')
     @_pg.production('stmt : bne')
     def _stmt(self, p):
@@ -87,6 +88,13 @@ class Parser(object):
         index = p[1].get_int()
         real_list = p[2].get_float_list()
         return Smx(index, real_list)
+
+    @_pg.production('smxf : SMXF index FILENAME')
+    def _smxf(self, p):
+        index = p[1].get_int()
+        # Strip the quotes.
+        filename = p[2].getstr()[1:-1]
+        return Smxf(index, filename)
 
     @_pg.production('pde : PDE index index')
     def _pde(self, p):

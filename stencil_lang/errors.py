@@ -46,6 +46,34 @@ class InvalidMatrixDimensionsError(StencilLanguageError):
             self._matrix_num, self._dimensions)
 
 
+class MatrixDimensionMismatchError(StencilLanguageError):
+    """Raised when matrix dimensions read from a file are inconsistent with the
+    matrix to which the contents are being assigned."""
+    def __init__(self, matrix_num, assignee_dimensions, assigned_dimensions):
+        """:param matrix_num: assigned matrix number
+        :type matrix_num: :class:`int`
+        :param assignee_dimensions: dimensions of the assigned matrix
+        :type assignee_dimensions: :class:`tuple` of \
+        (:class:`int`, :class:`int`)
+        :param assigned_dimensions: dimensions of the matrix from file
+        :type assigned_dimensions: :class:`tuple` of \
+        (:class:`int`, :class:`int`)
+        """
+        self._matrix_num = matrix_num
+        self._assignee_dimensions = assignee_dimensions
+        self._assigned_dimensions = assigned_dimensions
+
+    def __str__(self):
+        return (
+            'Dimensions of assignee matrix %d (%d, %d) '
+            'do not match assigned matrix (%d, %d)'
+        ) % (
+            self._matrix_num,
+            self._assignee_dimensions[0], self._assignee_dimensions[1],
+            self._assigned_dimensions[0], self._assigned_dimensions[1],
+        )
+
+
 class ArgumentError(StencilLanguageError):
     """Raised when an incorrect number of arguments is given."""
     def __init__(self, num_args_required, num_args_given):
@@ -75,7 +103,8 @@ class ParseError(StencilLanguageError):
 
 
 class InconsistentMatrixDimensions(StencilLanguageError):
-    """Raised when matrix dimensions are no longer consistent."""
+    """Raised during matrix parsing when matrix dimensions are no longer
+    consistent."""
     def __init__(self, first_row_cols, current_cols):
         """:param first_row_cols: Number of columns in the first row
         :type first_row_cols: :class:`int`
