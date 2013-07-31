@@ -4,7 +4,7 @@
 
 import sys
 
-from rpython.rlib.streamio import open_file_as_stream
+from rpython.rlib.streamio import open_file_as_stream, fdopen_as_stream
 
 from stencil_lang import metadata
 from stencil_lang.interpreter import run
@@ -19,7 +19,11 @@ def usage(argv):
     :return: the usage string
     :rtype: :class:`str`
     """
-    return 'usage: %s INPUT_FILENAME' % argv[0]
+    return '''usage: %s [INPUT_FILENAME]
+
+    INPUT_FILENAME
+        stencil language source file, omit or pass '-' to read from stdin
+''' % argv[0]
 
 
 def _main(argv):
@@ -52,12 +56,16 @@ URL: <%s>
         print '%s %s' % (metadata.project, metadata.version)
         return 0
 
-    if len(argv) != 2:
+    num_argv = len(argv)
+    if num_argv > 2:
         print usage(argv)
         return 1
 
-    input_filename = argv[1]
-    input_stream = open_file_as_stream(input_filename)
+    if num_argv == 1 or (num_argv == 2 and argv[1] == '-'):
+        input_stream = fdopen_as_stream(0, 'r')
+    else:
+        input_stream = open_file_as_stream(argv[1])
+
     try:
         source_code = input_stream.readall()
     finally:
