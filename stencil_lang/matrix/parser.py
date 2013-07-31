@@ -7,6 +7,7 @@ from stencil_lang.matrix.tokens import TOKENS
 from stencil_lang.structures import (
     FloatBox,
     FloatListBox,
+    FloatListListBox,
     Matrix,
     BaseParser,
 )
@@ -30,7 +31,7 @@ class Parser(BaseParser):
             matrix = Matrix(0, 0, [])
         else:
             list_list_box = p[0]
-            list_of_lists = list_list_box.get_float_list()
+            list_of_lists = list_list_box.get_float_list_list()
             rows = len(list_of_lists)
             matrix = Matrix(rows, self._cols, [])
             for list_ in list_of_lists:
@@ -49,13 +50,14 @@ class Parser(BaseParser):
             # lines: lines row
             list_list_box = p[0]
             number_list_box = p[1]
-            list_list_box.get_float_list().append(
+            list_list_box.get_float_list_list().append(
                 number_list_box.get_float_list())
         else:
             # lines : line
             # lines : row
             number_list_box = p[0]
-            list_list_box = FloatListBox([number_list_box.get_float_list()])
+            list_list_box = FloatListListBox(
+                [number_list_box.get_float_list()])
         return list_list_box
 
     @_pg.production('line : row newline')

@@ -94,7 +94,11 @@ class Parser(BaseParser):
     def _smxf(self, p):
         index = p[1].get_int()
         # Strip the quotes.
-        filename = p[2].getstr()[1:-1]
+        filename_with_quotes = p[2].getstr()
+        # Can't use [1:-1] here or else RPython will complain that it can't
+        # prove that the slice stop is not negative.
+        filename_with_right_quote = filename_with_quotes[1:]
+        filename = filename_with_right_quote[:-1]
         return Smxf(index, filename)
 
     @_pg.production('pde : PDE index index')

@@ -26,6 +26,11 @@ class BaseParser(object):
     pass
 
 
+# The RPLY BaseBox defines `_attrs_ = []', which prevents reading attributes
+# from box subclasses. I don't want that!!! Use this hack to fix it.
+del BaseBox._attrs_
+
+
 class ValueBox(BaseBox):
     """Box created to add methods not used in RPython."""
     def __repr__(self):
@@ -55,7 +60,7 @@ ValueBox.__init__ = _make_init()
 
 # Dynamically create boxes to take the monotony out of typing out each one by
 # hand. The contents are almost exactly the same.
-for box in ['int', 'float', 'float_list', 'bytecode_list']:
+for box in ['int', 'float', 'float_list', 'float_list_list', 'bytecode_list']:
     class_name = (
         ''.join([type_.capitalize() for type_ in box.split('_')]) + 'Box')
     getter_name = 'get_' + box
@@ -74,7 +79,9 @@ for box in ['int', 'float', 'float_list', 'bytecode_list']:
     })
 
 
-class Matrix(object):
+# Matrix has to be a type of box so that it can be passed back from a parser
+# production.
+class Matrix(BaseBox):
     """Matrix object for the interpreter."""
     def __init__(self, rows, cols, init_contents):
         """:param rows: number of rows
