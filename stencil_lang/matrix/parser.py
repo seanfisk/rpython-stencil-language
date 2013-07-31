@@ -37,19 +37,19 @@ class Parser(object):
         return matrix
 
     # Newline at the end.
-    @_pg.production('lines : lines line')
+    @_pg.production('lines : line lines')
     @_pg.production('lines : line')
     # No newline at the end.
-    @_pg.production('lines : lines row')
+    @_pg.production('lines : row lines')
     @_pg.production('lines : row')
     def _lines(self, p):
         if len(p) == 2:
-            # lines: lines line
+            # lines: line lines
             # lines: lines row
-            list_list_box = p[0]
-            number_list_box = p[1]
-            list_list_box.get_float_list().append(
-                number_list_box.get_float_list())
+            number_list_box = p[0]
+            list_list_box = p[1]
+            list_list_box.get_float_list().insert(
+                0, number_list_box.get_float_list())
         else:
             # lines : line
             # lines : row
@@ -76,16 +76,16 @@ class Parser(object):
 
     # TODO: copied from stencil_lang/interpreter/parser.py
     # number_list must come first to parse the first number s first.
-    @_pg.production('number_list : number_list number')
+    @_pg.production('number_list : number number_list')
     @_pg.production('number_list : number')
     def _number_list(self, p):
         if len(p) == 2:
-            # number_list : number_list number
-            number_list_box = p[0]
-            number = p[1].get_float()
+            # number_list : number number_list
+            number = p[0].get_float()
+            number_list_box = p[1]
             # TODO: Might have a problem with this mutating the list in the
             # future.
-            number_list_box.get_float_list().append(number)
+            number_list_box.get_float_list().insert(0, number)
         else:
             # number_list : number
             number = p[0].get_float()
