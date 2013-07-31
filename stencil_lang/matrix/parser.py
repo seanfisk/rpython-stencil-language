@@ -8,6 +8,7 @@ from stencil_lang.structures import (
     FloatBox,
     FloatListBox,
     Matrix,
+    BaseParser,
 )
 from stencil_lang.errors import (
     InconsistentMatrixDimensions,
@@ -15,7 +16,7 @@ from stencil_lang.errors import (
 )
 
 
-class Parser(object):
+class Parser(BaseParser):
     """Matrix parser."""
     def __init__(self):
         self._cols = -1

@@ -17,6 +17,15 @@ from stencil_lang.utils import rjust, ljust
 # problems, for example, in the error message string formatting.
 
 
+class BaseParser(object):
+    """Base class for parsers. Created to fix problem in RPython with parsers
+    being passed to RPLY.
+    """
+    # This necessitated itself when the SMXF instruction was added, pulling in
+    # the code for the matrix parser.
+    pass
+
+
 class ValueBox(BaseBox):
     """Box created to add methods not used in RPython."""
     def __repr__(self):

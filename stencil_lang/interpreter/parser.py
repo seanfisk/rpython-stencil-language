@@ -9,11 +9,12 @@ from stencil_lang.structures import (
     FloatBox,
     FloatListBox,
     BytecodeListBox,
+    BaseParser,
 )
 from stencil_lang.errors import ParseError
 
 
-class Parser(object):
+class Parser(BaseParser):
     """Source code parser and intepreter."""
     _pg = ParserGenerator(TOKENS.keys(), cache_id=__name__)
 
