@@ -20,6 +20,11 @@ class TestFromString(object):
 -34 -12.2
 ''') == Matrix(2, 2, [11.7, 52, -34, -12.2])
 
+    def test_scientific_notation(self):
+        assert from_string('''1.2e10 -22.2
+10e2 -9.1e-3
+1 5e-6''') == Matrix(3, 2, [1.2e10, -22.2, 10e2, -9.1e-3, 1, 5e-6])
+
     def test_inconsistent_dims(self):
         with raises(InconsistentMatrixDimensions) as exc_info:
             from_string('''34 5

@@ -3,7 +3,7 @@
 
 TOKENS = {
     # Read integers and reals the same way.
-    'NUMBER': r'-?\d+(?:\.\d*)?',
+    'NUMBER': r'-?\d+(?:\.\d*)?(e-?\d+)?',
     'NEWLINE':  r'\n',
 }
 """Language tokens."""

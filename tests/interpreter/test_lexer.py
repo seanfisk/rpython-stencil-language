@@ -1,4 +1,6 @@
 from pytest import raises
+import pytest
+parametrize = pytest.mark.parametrize
 from rply import Token
 from rply.errors import LexingError
 
@@ -65,6 +67,10 @@ class TestLexer(object):
 
         def test_neg_int_leading_zero(self):
             assert_lex_token_list('-078', [('NEG_INT', '-078')])
+
+        @parametrize('real', ['1.2e10', '10e2', '-9.1e-3', '5e-6'])
+        def test_real_scientific_notation(self, real):
+            assert_lex_token_list(real, [('REAL_SCI', real)])
 
         def test_filename_without_spaces(self):
             assert_lex_token_list('"file/name/withoutspaces"',

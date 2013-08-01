@@ -139,6 +139,7 @@ class Parser(BaseParser):
     @_pg.production('real : POS_INT')
     @_pg.production('real : NEG_INT')
     @_pg.production('real : REAL')
+    @_pg.production('real : REAL_SCI')
     def _real(self, p):
         # Convert integers and reals to float representation.
         return FloatBox(float(p[0].getstr()))
