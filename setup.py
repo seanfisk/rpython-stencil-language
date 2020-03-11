@@ -40,7 +40,7 @@ setup_dict = dict(
     ],
     packages=find_packages(exclude=['tests', 'tests.*']),
     install_requires=[
-        'rply==0.6.1',
+        'rply==0.7.4',
     ],
     dependency_links=[
         'https://github.com/alex/rply/archive/'
